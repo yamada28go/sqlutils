@@ -11,11 +11,11 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
-	<logger name="jp.co.vega_net.sqlutils" level="INFO" additivity="false">
+	<logger name="jp.gr.java_conf.sqlutils" level="INFO" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<logger name="jp.co.vega_net.sqlutils.DBManager" level="DEBUG" additivity="false">
+	<logger name="jp.gr.java_conf.sqlutils.DBManager" level="DEBUG" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

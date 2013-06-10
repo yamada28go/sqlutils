@@ -28,7 +28,7 @@ import jp.gr.java_conf.sqlutils.core.handler.ResultSetParser;
  * static methods
  * use with static-import like
  * <pre>
- * import static jp.co.vega_net.sqlutils.builder.QueryBuilder.*;
+ * import static jp.gr.java_conf.sqlutils.core.builder.QueryBuilder.*;
  * </pre>
  */
 public class QueryBuilder extends ConditionBuilder {

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<!--
+	■全般的な注意
+
+	設定上の大文字小文字に関して
+	XMLは、要素名、属性名および値において、全てに大文字小文字が区別されます。
+	間違えないように注意して下さい。
+
+	 テーブル名、カラム名の大文字小文字に関して
+	JDBCドライバからメタデータを取得し、その名前を元に決定します。
+	全てはDBMS（＆JDBCドライバ）の実装に従います。
+	よって、この設定ファイル上でテーブル名、カラム名を指定する際には、
+	JDBCからの戻り値とCaseSensitiveにマッチするように注意して下さい。
+
+	■機能概要
+	データアクセス用のテーブル定義と、データ格納用のDTO（DataTransferObject）を自動生成します。
+	また付随機能として、特定のテーブルの値を元に、Enumを自動生成します。
+	※DBMSのEnum型はサポートしません。
+
+	●テーブル定義クラスの自動生成
+	テーブル定義は、一つのクラスファイル内に、テーブル毎にstaticな定数として生成されます。
+	これらの名前も、Javaの言語使用に合致するよう、自動的に変換されます。
+	デフォルトではToUpper（ex:aaa_bbb→AAA_BBB）となります。
+
+	※名称変換処理に関して：
+	DBMSによっては、大文字小文字の混在や、2バイト文字が使用される場合があります。
+	これらの場合、デフォルトままでは意図しない変換が行われる可能性がありますので、それぞれに
+	任意のNameResolverを指定して下さい。
+
+
+	●DTOの生成
+	DTOは、テーブル毎に一つのクラスファイルが作成されます。
+	これらのクラス名は、Javaの言語使用に合致するよう、自動的に変換されます。
+	デフォルトではキャメライズ（ex:aaa_bbb→AaaBbb）となります。
+
+	DTOクラスには、各カラムに対応したフィールドが用意されます。
+	フィールド名に関しては、クラス名と同様に名称変換ロジックが用意されます。
+	デフォルトはキャメライズ（但し先頭小文字）となります。
+
+	フィールドの型はJDBCのメタデータから自動的に決定されますが、
+	converterを指定して、任意の型を設定する事も可能です。
+	※converterは、フィールド型と、JDBCの戻り型からその型への変換式、その型からJDBC型への変換式、の3点が必要です。
+
+	TODO DATETIME型：JDBCによってはjava.util.Dateを返すものと、java.sql.Timestamp型を返すものがあります
+
+	TIME型に関して：
+	　通常java.sql.Time型が返されるが、このクラスはtoSring()、valueOf()などでミリ秒に対応していません。
+	　このため、ミリ秒まで有意な値を含むTIME型カラムと接続すると、いろいろ問題・混乱のネタになります。
+　　　　この問題を回避するため、TIME型は独自型であるjp.gr.java_conf.sqlutils.date.SqlTime型にバインドします。
+　　　　このクラスはjava.sql.Time型を継承し、かつミリ秒を保持しません（常に0）。
+　　　　これは、一般的な用途として「時分秒のみを扱う」想定で機能を限定する事で、PG上予期せぬ不具合を回避する事を
+　　　　目的としています。逆に正しくミリ秒まで保持したい場合は、コンバータを設定して、
+　　　　jp.gr.java_conf.sqlutils.date.SqlTimeMSec型にバインドして下さい。
+
+	●Enumの自動生成
+	名前と値のセットでEnumを構築します。
+	値は、文字型あるいは数値型（Integerに収まる範囲）が可能です。
+	一つのテーブルから、複数のEnum定義を生成します。
+	Enum名およびEnumItem名の決定方法は、適宜にNameResolverを指定して下さい。
+	デフォルトは、どちらもUnderSplittedである事を想定して、Enum名への変換はキャメライズ、
+	EnumItem名への変換はToUpperです。
+	ex: build_type | type_static → BuildType.TYPE_STATIC
+
+	 -->
+
+	<!--
+	 dbms:ORACLE, POSTGRES, MYSQL, SQLSERVER, H2, ELSE
+	 -->
+	<db
+		dbms="dbms name"
+		driver="jdbc driver"
+		url="url"
+		user="usename"
+		pass="password"
+		schema="target schema" />
+
+	<!-- source folder base path -->
+	<output
+		basePath="fullpath like xxxxx\src\main\java"
+	/>
+
+	<!-- DTOおよびテーブル定義の生成設定 -->
+	<dtoGenerator
+		package="package name like xx.xx.xx.generated.dto"
+		definitionClassName="default is TableDefine">
+
+		<!-- 全テーブルに対してデフォルトで適用される名称変換ロジックの指定 -->
+		<defaultTblNameResolver>
+			<!-- ↓これがデフォルト -->
+			<dtoClassName xsi:type="camelizeAndCapitalize"/>
+			<definitionName xsi:type="toUpper"/>
+		</defaultTblNameResolver>
+
+		<!-- 全テーブルの全カラムに対してデフォルトで適用される名称変換ロジックの指定 -->
+		<defaultColNameResolver>
+			<!-- ↓これがデフォルト -->
+			<dtoFieldName xsi:type="camelize"/>
+			<definitionName xsi:type="toUpper"/>
+		</defaultColNameResolver>
+
+		<!-- テーブル個別の設定 -->
+		<table name="sample_table_1">
+
+			<!-- このテーブルに対して使用される名称変換ロジック。省略時はdefaultTblNameResolverの値が適用される。 -->
+			<tblNameResolver>
+				<dtoClassName xsi:type="void" prefix="Dto"/>
+				<definitionName xsi:type="void"/>
+			</tblNameResolver>
+
+			<!-- このテーブル内の全カラムに対してデフォルトで適用される名称変換ロジックの指定。省略時は同上 -->
+			<defaultColNameResolver>
+				<dtoFieldName xsi:type="void"/>
+				<definitionName xsi:type="void"/>
+			</defaultColNameResolver>
+
+			<!-- カラム個別の設定 -->
+			<column name="col_1">
+
+				<!-- このカラムに対してのみ適用される名称変換ロジックの指定。省略時は同上 -->
+				<colNameResolver>
+					<dtoFieldName xsi:type="void"/>
+					<definitionName xsi:type="void"/>
+				</colNameResolver>
+
+				<!-- 指定された名前のシーケンスと紐付けされる（Insert時に自動採番される）。 -->
+				<sequenceRelation name="table1_id_sequence" />
+
+			</column>
+
+			<column name="bool_col">
+				<!-- コンバータの一種。数値型カラムの値を、DTO上ではBooleanに変換して扱う。boolean型をサポートしないDBMS向け。 -->
+				<intBoolConverter />
+			</column>
+
+			<column name="delete_flag"
+				isLogicalDeleteFlag="true"><!-- 数値型たはBool型カラムを、論理削除フラグとして扱う。 -->
+			</column>
+
+			<column name="update_date"
+				isOptimisticLockKey="true"><!-- 数値型たはTimestamp型カラムを、楽観排他ロックのキーとして扱う。 -->
+			</column>
+
+			<column name="code_value"
+				<!-- enumGenerator機能で生成されるEnumと紐付ける。 -->
+				<!-- コンバータの一種。数値型あるいは文字型のカラムの値を、DTO上では紐づられたEnumの型として扱う。 -->
+				<!-- ここでは名前変換を一切しないので、enumNameは、Enum生成側の設定の結果導出されるEnum名で指定する事 -->
+				<enumRelation
+					baseClassName="name of generated enum class"
+					enumName="name og generated enum" />
+			</column>
+		</table>
+
+	</dtoGenerator>
+
+	<!-- Enumの生成設定。この機能を使用しない場合は、この要素丸ごと削除可 -->
+	<enumGenerator
+		package="package name like xx.xx.xx.generated.enumconst" >
+
+		<!--
+		dataType: INT / STR を指定する
+		INTの場合は、enumItemValueColで指定されたカラムの型が数値型でなければいけない。
+		STRの場合は文字型。
+		カラム名はデフォルト通りなら省略可能
+		複数設定可能。値に数値を取るタイプと、文字列を取るタイプの2通り作成したい場合は、テーブルを2つ用意すればよい。
+		 -->
+		<srcTable
+			dataType="INT"
+			tblName="name of table"
+			baseClassName="name of class"
+			enumNameCol="default is ENUM_NAME"
+			enumItemNameCol="default is ENUM_ITEM_NAME"
+			enumItemValueCol="default is ENUM_ITEM_VALUE"
+			enumItemOrderCol="default is ENUM_ITEM_ORDER">
+
+			<enumNameResolver xsi:type="camelizeAndCapitalize"/>
+			<itemNameResolver xsi:type="toUpper"/>
+		</srcTable>
+ 	</enumGenerator>
+
+</root>

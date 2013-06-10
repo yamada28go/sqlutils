@@ -29,22 +29,6 @@
 		</license>
 	</licenses>
 
-	<!-- <distributionManagement>
-		<repository>
-			<id>jp.co.vega_net</id>
-			<name>vega ts repository</name>
-			<url>dav:http://shared.vega-net.ne.jp/tslib_maven</url>
-		</repository>
-	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>jp.co.vega_net</id>
-			<name>vega ts repository</name>
-			<url>dav:http://shared.vega-net.ne.jp/tslib_maven</url>
-		</repository>
-	</repositories> -->
-
 	<dependencies>
 
 		<dependency>
@@ -53,11 +37,6 @@
 			<version>${sqlutils.version}</version>
 		</dependency>
 
-<!-- <dependency>
-	<groupId>commons-digester</groupId>
-	<artifactId>commons-digester</artifactId>
-	<version>2.1</version>
-</dependency> -->
 		<dependency>
 			<groupId>javax.xml</groupId>
 			<artifactId>jaxb-api</artifactId>
@@ -234,7 +213,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>jp.co.vega_net.dtogenerator.GeneratorMain</mainClass>
+							<mainClass>jp.gr.java_conf.sqlutils.generator.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

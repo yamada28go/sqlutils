@@ -1,3 +1,3 @@
-Copyright (c) 2012 vega-system
+Copyright (c) 2012 M.Hamanishi
 
-MITƒ‰ƒCƒZƒ“ƒX‚Å‚·B•t‘®‚ÌMIT.txt‚ðŽQÆ‚­‚¾‚³‚¢B
+MITï¿½ï¿½ï¿½Cï¿½Zï¿½ï¿½ï¿½Xï¿½Å‚ï¿½ï¿½Bï¿½tï¿½ï¿½ï¿½ï¿½MIT.txtï¿½ï¿½ï¿½Qï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B

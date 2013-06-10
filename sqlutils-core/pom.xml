@@ -5,7 +5,6 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>jp.gr.java_conf.sqlutils</groupId>
-	<!-- <artifactId>sqlutils</artifactId> -->
 	<artifactId>sqlutils-core</artifactId>
 
 	<version>2.1.0-snapshot</version>
@@ -25,18 +24,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<!-- <distributionManagement>
-		<repository>
-			<id>jp.co.vega_net</id>
-			<name>vega ts repository</name>
-			<url>dav:http://shared.vega-net.ne.jp/tslib_maven</url>
-		</repository>
-	</distributionManagement> -->
-
-
-	<properties>
-	</properties>
 
 	<dependencies>
 

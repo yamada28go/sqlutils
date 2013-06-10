@@ -12,6 +12,7 @@ import java.util.Map;
 import jp.gr.java_conf.sqlutils.core.builder.QueryBuilder;
 import jp.gr.java_conf.sqlutils.core.builder.UpdateQueryBuilder;
 import jp.gr.java_conf.sqlutils.core.connection.IConnectionProvider;
+import jp.gr.java_conf.sqlutils.core.connection.Tx;
 import jp.gr.java_conf.sqlutils.core.dto.IDto;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.EightJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FiveJoinned;
@@ -205,9 +206,10 @@ public class DBManager {
 	 * Exception発生時にはロールバック＆クローズされる。
 	 *
 	 * SimpleConnectionProviderを使用している場合は、
-	 * jp.co.vega_net.sqlutils.connection.Txクラスを使用すれば、
+	 * jp.gr.java_conf.sqlutils.connection.Txクラスを使用すれば、
 	 * Exception発生時にはロールバック＆クローズされる。
 	 *
+	 * @see jp.gr.java_conf.sqlutils.core.connection.Tx
 	 */
 	public void rollback() {
 		if (conn != null) {
