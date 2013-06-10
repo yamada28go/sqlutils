@@ -1,0 +1,198 @@
+package ${packageName};
+
+import ${class_ITable};
+import ${class_IGeneratedDto};
+#if(${tbl.persistable})
+import ${class_IPersistableDto};
+#end
+#if(${tbl.optimisticLockKeyCol})
+import ${class_IOptimisticLockingDto};
+#end
+#if(${tbl.logicalDeleteFlagCol})
+import ${class_ILogicalDeletingDto};
+#end
+import ${class_NoSuchColumnException};
+import ${packageName}.${defClassName};
+
+
+/*
+ * This class is generated automatically.
+ * Never change from your hand.
+ */
+/**
+ * <pre>
+ * schema name : "${schema}"
+ * table name  : "${tbl.name}"
+ *
+#if(${tbl.persistable})
+ * Persistable:
+ *  Available to use Persistor-methods, like DBManager#insert(IPersistable),#update(IPersistable),#delete(IPersistable),else.
+ *
+#end
+#if(${tbl.optimisticLockKeyCol})
+ * Optimistic-locking:
+ *  Automatically checked whether updated by another user or not at Persistor-methods.
+ *  Key column = "${tbl.optimisticLockKeyCol.name}"
+ *
+#end
+#if(${tbl.logicalDeleteFlagCol})
+ * Logical-delete:
+ *  Logically deleted at DBManager#delete().
+ *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder#containLogicalDeletedRecords().
+ *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
+ *
+#end
+ * </pre>
+ */
+public class ${className} implements IGeneratedDto,#if(${tbl.persistable}) IPersistable,#if(${tbl.optimisticLockKeyCol}) IOptimisticLocking,#end#if(${tbl.logicalDeleteFlagCol}) ILogicalDeleting,#end#end Cloneable {
+
+	private static final long serialVersionUID = 1L;
+
+#if(${tbl.persistable})
+	public static ${className} createWithKey(
+#foreach($col in ${tbl.primaryKeyCols})
+			${col.dtoFieldClassType} ${col.dtoFieldName}#if($velocityHasNext),#end
+
+#end
+
+	) {
+		${className} dto = new ${className}();
+#foreach($col in ${tbl.primaryKeyCols})
+		dto.${col.dtoFieldName} = ${col.dtoFieldName};
+#end
+		return dto;
+	}
+#end
+
+
+	@Override
+	public String getTableName() {
+		return "${tbl.name}";
+	}
+
+#foreach($col in ${tbl.cols})
+	/**
+	 * <pre>
+	 * column name   : "${col.name}"
+	 *
+#if(${col.primaryKey})
+	 * primary key   : YES
+#end
+#if(${col.autoIncrement})
+	 * auto-increment
+#end
+	 * nullable      : ${col.nullable}
+	 * data-type     : ${col.dataType} (*java.sql.Types)
+#if(${col.dataTypeChar})
+	 *  < fixed length char >
+#end
+	 * type-name     : ${col.dataTypeName}
+	 * size          : ${col.size}
+	 * default value : "$!{col.defaultValue}"
+	 *
+#if(${col.relatedSequence})
+	 * auto numbering from sequence : "${col.relatedSequence}"
+#end
+#if(${col.logicalDeleteFlag})
+	 * used as logical-delete-flag
+#end
+#if(${col.optimisticLockKey})
+	 * used as optimistic-lock-key
+#end
+#if(${col.relatedEnum})
+	 * related with value-enum : ${col.relatedEnum}
+#end
+	 * </pre>
+	 * @see java.sql.Types
+#if(${col.relatedEnum})
+	 * @see ${col.dtoFieldClassType}
+#end
+	 */
+	public ${col.dtoFieldClassType} ${col.dtoFieldName} = null;
+
+#end
+
+	public ITable getTableDefinition() {
+		return ${defClassName}.${tbl.definitionName};
+	}
+
+
+	public void set(String colName, Object val) throws NoSuchColumnException {
+//		String name = colName.toUpperCase();
+		String name = colName;
+
+		try {
+			if ("_DUMMY_".equals(name)) ;
+#foreach($col in ${tbl.cols})
+			else if ("${col.name}".equals(name)) this.${col.dtoFieldName} = ${col.setToDtoConversion};
+#end
+			else throw new NoSuchColumnException(colName);
+		} catch (ClassCastException e) {
+			throw new RuntimeException("Failed to cast: colname=[" + name + "] val=[" + val.getClass().getName() + "]");
+		}
+	}
+
+	public Object get(String colName) {
+//		String name = colName.toUpperCase();
+		String name = colName;
+		if ("_DUMMY_".equals(name)) return null;
+#foreach($col in ${tbl.cols})
+		else if ("${col.name}".equals(name)) return ${col.getFromDtoConversion};
+#end
+		else throw new RuntimeException("Unexpected column name! : " + name);
+	}
+
+
+	public ${className} clone(){
+		${className} clone = new ${className}();
+		copyTo(clone);
+		return clone;
+	}
+
+	public void copyTo(${className} dest){
+#foreach($col in ${tbl.cols})
+	    dest.${col.dtoFieldName} = this.${col.dtoFieldName};
+#end
+	}
+
+	public boolean isNull() {
+#foreach($col in ${tbl.cols})
+		if (this.${col.dtoFieldName} != null) return false;
+#end
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder()
+			.append(getClass().getName() + "@" + Integer.toHexString(hashCode()))
+			.append("[")
+#foreach($col in ${tbl.cols})
+			.append("${col.dtoFieldName}=").append(this.${col.dtoFieldName}).append(",")
+#end
+		;
+		sb.deleteCharAt(sb.length()-1);
+		sb.append("]");
+		return sb.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof ${tbl.dtoClassName})) return false;
+		${tbl.dtoClassName} another = (${tbl.dtoClassName})obj;
+#foreach($col in ${tbl.cols})
+		if (!isEqualCol(this.${col.dtoFieldName}, another.${col.dtoFieldName})) return false;
+#end
+		return true;
+	}
+
+	private static boolean isEqualCol(Object o1, Object o2) {
+		if (o1 == null && o2 == null)
+			return true;
+		else if (o1 != null && o2 != null)
+			return o1.equals(o2);
+		else
+			return false;
+	}
+}

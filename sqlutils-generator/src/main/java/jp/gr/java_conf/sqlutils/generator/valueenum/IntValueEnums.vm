@@ -1,0 +1,47 @@
+package ${packageName};
+
+
+import ${class_IValueEnum};
+
+
+/*
+ * This class is generated automatically.
+ * Never change from your hand.
+ */
+public class ${baseClassName} {
+
+#foreach($enum in ${enums})
+	/**
+	 * Integer-value-enum constans. Elements are
+	 * <ul>
+#foreach($elem in ${enum.elems})
+	 * <li>${elem.key} ( Actual value : "${elem.value}")
+#end
+	 * </ul>
+	 */
+	public enum ${enum.name} implements IValueEnum<Integer> {
+#foreach($elem in ${enum.elems})
+		/** Actual value : "${elem.value}" */
+		${elem.key}#if(${elem.value})(${elem.value})#else(null)#end,
+#end
+		;
+		private int val;
+		private ${enum.name}(int val) {
+			this.val = val;
+		}
+		public Integer getValue() {
+			return val;
+		}
+	}
+
+#end
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Enum<? extends IValueEnum<Integer>>> T get(Class<T> t, Object val) {
+		for (T s : t.getEnumConstants()) {
+			if (((IValueEnum<Integer>) s).getValue() == ((Integer)val).intValue())
+				return s;
+		}
+		throw new RuntimeException("unparsable value : " + val);
+	}
+}

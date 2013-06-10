@@ -1,0 +1,122 @@
+package ${packageName};
+
+
+import ${class_IColumn};
+import ${class_Column};
+//import ${class_ITable};
+import ${class_Table};
+
+
+/*
+ * This class is generated automatically.
+ * Never change from your hand.
+ */
+public interface ${defClassName} {
+
+	// Tables
+#foreach($tbl in ${tbls})
+	/**
+	 * <pre>
+	 * schema name : "${schema}"
+	 * table name  : "${tbl.name}"
+	 *
+#if(${tbl.persistable})
+	 * Persistable:
+	 *  Available to use Persistor-methods, like DBManager#insert(IPersistable),#update(IPersistable),#delete(IPersistable),else.
+	 *
+#end
+#if(${tbl.optimisticLockKeyCol})
+	 * Optimistic-locking:
+	 *  Automatically checked whether updated by another user or not at Persistor-methods.
+	 *  Key column = "${tbl.optimisticLockKeyCol.name}"
+	 *
+#end
+#if(${tbl.logicalDeleteFlagCol})
+	 * Logical-delete:
+	 *  Logically deleted at DBManager#delete().
+	 *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder#containLogicalDeletedRecords().
+	 *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
+	 *
+#end
+	 * </pre>
+	 */
+	public static final ${tbl.dtoClassName}Definition ${tbl.definitionName} = new ${tbl.dtoClassName}Definition();
+
+#end
+
+
+	// Table definition classes
+#foreach($tbl in ${tbls})
+	public static class ${tbl.dtoClassName}Definition extends Table {
+		private static final long serialVersionUID = 1L;
+		${tbl.dtoClassName}Definition() {
+			super("${tbl.name}", "${schema}", ${packageName}.${tbl.dtoClassName}.class);
+		}
+
+		// Columns
+#foreach($col in ${tbl.cols})
+		/**
+		 * <pre>
+		 * column name   : "${col.name}"
+		 *
+#if(${col.primaryKey})
+		 * primary key   : YES
+#end
+#if(${col.autoIncrement})
+		 * auto-increment
+#end
+		 * nullable      : ${col.nullable}
+		 * data-type     : ${col.dataType} (*java.sql.Types)
+#if(${col.dataTypeChar})
+		 *  < fixed length char >
+#end
+		 * type-name     : ${col.dataTypeName}
+		 * size          : ${col.size}
+		 * default value : "$!{col.defaultValue}"
+		 *
+#if(${col.relatedSequence})
+	 	* auto numbering from sequence : "${col.relatedSequence}"
+#end
+#if(${col.logicalDeleteFlag})
+		 * used as logical-delete-flag
+#end
+#if(${col.optimisticLockKey})
+		 * used as optimistic-lock-key
+#end
+#if(${col.relatedEnum})
+		 * related with value-enum : ${col.relatedEnum}
+#end
+		 * </pre>
+		 * @see java.sql.Types
+#if(${col.relatedEnum})
+		 * @see ${col.dtoFieldClassType}
+#end
+		 */
+#if(${col.enumVals})
+#set($className = ${dtoPackageName}+"."+${tbl.dtoClassName}+"."+${col.fieldClassName})
+		public final IColumn<${className}> ${col.definitionName} =
+			new Column<${className}>("${col.nameUpper}", "${col.dtoFieldName}", this, ${className}.class, ${col.primaryKey}, ${col.dataTypeChar}, ${col.autoIncrement}, /*${col.logicalDeleteFlag}, ${col.optimisticLockKey},*/#if(${col.relatedSequence}) "${col.relatedSequence}"#else null#end, ${col.size});
+#else
+		public final IColumn<${col.dtoFieldClassType}> ${col.definitionName} =
+			new Column<${col.dtoFieldClassType}>("${col.name}", "${col.dtoFieldName}", this, ${col.dtoFieldClassType}.class, ${col.primaryKey}, ${col.dataTypeChar}, ${col.autoIncrement}, /*${col.logicalDeleteFlag}, ${col.optimisticLockKey},*/#if(${col.relatedSequence}) "${col.relatedSequence}"#else null#end, ${col.size});
+#end
+
+#end
+		public IColumn<?>[] getCols() {
+			return new IColumn[]{
+#foreach($col in ${tbl.cols})
+				${col.definitionName},
+#end
+			};
+		}
+		public IColumn<?> getLogicalDeleteFlagCol() {
+			return#if(${tbl.logicalDeleteFlagCol}) ${tbl.logicalDeleteFlagCol.definitionName}#else null#end;
+		}
+		public IColumn<?> getOptimisticLockingKeyCol() {
+			return#if(${tbl.optimisticLockKeyCol}) ${tbl.optimisticLockKeyCol.definitionName}#else null#end;
+		}
+	}
+
+#end
+
+}
