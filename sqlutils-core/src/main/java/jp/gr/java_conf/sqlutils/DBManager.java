@@ -12,8 +12,6 @@ import java.util.Map;
 import jp.gr.java_conf.sqlutils.core.builder.QueryBuilder;
 import jp.gr.java_conf.sqlutils.core.builder.UpdateQueryBuilder;
 import jp.gr.java_conf.sqlutils.core.connection.IConnectionProvider;
-import jp.gr.java_conf.sqlutils.core.connection.Tx;
-import jp.gr.java_conf.sqlutils.core.dto.IDto;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.EightJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FiveJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FourJoinned;
@@ -21,6 +19,7 @@ import jp.gr.java_conf.sqlutils.core.dto.DtoSet.JoinnedDto;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.SevenJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.SixJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.ThreeJoinned;
+import jp.gr.java_conf.sqlutils.core.dto.IDto;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.ILogicalDeleting;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IOptimisticLocking;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
@@ -206,7 +205,7 @@ public class DBManager {
 	 * Exception発生時にはロールバック＆クローズされる。
 	 *
 	 * SimpleConnectionProviderを使用している場合は、
-	 * jp.gr.java_conf.sqlutils.connection.Txクラスを使用すれば、
+	 * jp.gr.java_conf.sqlutils.core.connection.Txクラスを使用すれば、
 	 * Exception発生時にはロールバック＆クローズされる。
 	 *
 	 * @see jp.gr.java_conf.sqlutils.core.connection.Tx
@@ -293,7 +292,7 @@ public class DBManager {
 	 *
 	 * rollback()メソッドと同様に、通常この処理を明示的に呼び出すケースは想定されない。
 	 * ThreadLocalConnectionProviderや、
-	 * jp.co.vega_net.sqlutils.connection.Txクラスに任せれば良い。
+	 * jp.gr.java_conf.sqlutils.core.connection.Txクラスに任せれば良い。
 	 *
 	 */
 	public DBManager setPostProcessOnException(PostProcessOnException postProcessOnException) {
