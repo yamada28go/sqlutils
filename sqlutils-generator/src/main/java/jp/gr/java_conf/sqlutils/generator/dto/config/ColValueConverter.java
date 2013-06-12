@@ -3,6 +3,8 @@ package jp.gr.java_conf.sqlutils.generator.dto.config;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import jp.gr.java_conf.sqlutils.generator.dto.DtoGenerator;
+
 public class ColValueConverter {
 
 
@@ -47,6 +49,30 @@ public class ColValueConverter {
 		private IntBoolConverter() {}
 	}
 
+
+	public static class EnumConverterWrapper extends ColValueConverter {
+
+		@XmlAttribute(name="baseClassName")
+		public String baseClassName;
+
+		@XmlAttribute(name="enumName")
+		public String enumName;
+
+		public void validate(String pos) {
+			Config.CheckRequired(baseClassName, pos + "/enumRelation@baseClassName");
+			Config.CheckRequired(enumName, pos + "/enumRelation@enumName");
+		}
+
+		public ColValueConverter resolve(String enumPackageName) {
+			ColValueConverter c = new ColValueConverter();
+			String baseClass = DtoGenerator.ENUM_CONFIG.package_ + "." + baseClassName;
+			String enumClass = baseClass + "." + enumName;
+			c.dtoFieldClassType = enumClass;
+			c.setToDtoConversion = "val == null ? null : " + baseClass + ".get(" + enumClass + ".class, val)";
+			c.getFromDtoConversion = "this." + ColValueConverter.FIELDNAME_PLACEHOLDER + " == null ? null : this." + ColValueConverter.FIELDNAME_PLACEHOLDER + ".getValue()";
+			return c;
+		}
+	}
 
 
 

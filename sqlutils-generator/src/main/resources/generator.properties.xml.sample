@@ -146,7 +146,7 @@
 				<!-- enumGenerator機能で生成されるEnumと紐付ける。 -->
 				<!-- コンバータの一種。数値型あるいは文字型のカラムの値を、DTO上では紐づられたEnumの型として扱う。 -->
 				<!-- ここでは名前変換を一切しないので、enumNameは、Enum生成側の設定の結果導出されるEnum名で指定する事 -->
-				<enumRelation
+				<enumConverter
 					baseClassName="name of generated enum class"
 					enumName="name og generated enum" />
 			</column>

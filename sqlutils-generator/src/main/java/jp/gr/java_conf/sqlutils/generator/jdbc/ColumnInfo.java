@@ -4,7 +4,6 @@ import java.sql.Types;
 
 import jp.gr.java_conf.sqlutils.generator.dto.config.ColValueConverter;
 import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.ColumnSetting;
-import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.EnumRelation;
 import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.SequenceRelation;
 
 public class ColumnInfo {
@@ -94,11 +93,11 @@ public class ColumnInfo {
 //		return setting == null ? false :
 //			setting.enumRelation == null ? false : true;
 //	}
-	public EnumRelation getRelatedEnum() {
-		if (setting != null)
-			return setting.enumRelation;
-		return null;
-	}
+//	public EnumRelation getRelatedEnum() {
+//		if (setting != null)
+//			return setting.enumRelation;
+//		return null;
+//	}
 
 
 	public String getDtoFieldClassType() {

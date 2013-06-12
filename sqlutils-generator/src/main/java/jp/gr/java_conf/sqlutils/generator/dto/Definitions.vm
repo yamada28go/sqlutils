@@ -83,14 +83,14 @@ public interface ${defClassName} {
 #if(${col.optimisticLockKey})
 		 * used as optimistic-lock-key
 #end
-#if(${col.relatedEnum})
-		 * related with value-enum : ${col.relatedEnum}
-#end
+##if(${col.relatedEnum})
+##		 * related with value-enum : ${col.relatedEnum}
+##end
 		 * </pre>
 		 * @see java.sql.Types
-#if(${col.relatedEnum})
-		 * @see ${col.dtoFieldClassType}
-#end
+##if(${col.relatedEnum})
+##		 * @see ${col.dtoFieldClassType}
+##end
 		 */
 #if(${col.enumVals})
 #set($className = ${dtoPackageName}+"."+${tbl.dtoClassName}+"."+${col.fieldClassName})

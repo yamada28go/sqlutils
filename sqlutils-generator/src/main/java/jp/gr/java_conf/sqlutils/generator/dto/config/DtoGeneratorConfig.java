@@ -81,12 +81,12 @@ public class DtoGeneratorConfig {
 			}
 		}
 
-		public EnumRelation getColEnumRelation(String colName) {
-			ColumnSetting c = getColumnSetting(colName);
-			if (c != null)
-				return c.enumRelation;
-			return null;
-		}
+//		public EnumRelation getColEnumRelation(String colName) {
+//			ColumnSetting c = getColumnSetting(colName);
+//			if (c != null)
+//				return c.enumRelation;
+//			return null;
+//		}
 
 		public ColValueConverter getColValueConverter(String colName) {
 			ColumnSetting c = getColumnSetting(colName);
@@ -134,10 +134,11 @@ public class DtoGeneratorConfig {
 			@XmlElement(name="converter", type=ColValueConverter.class ),
 			@XmlElement(name="strTrimConverter", type=ColValueConverter.StrTrimConverter.class),
 			@XmlElement(name="intBoolConverter", type=ColValueConverter.IntBoolConverter.class),
+			@XmlElement(name="enumConverter", type=ColValueConverter.EnumConverterWrapper.class)
 		})
 		public ColValueConverter converter;
 
-		public EnumRelation enumRelation;
+//		public EnumRelation enumRelation;
 
 		public SequenceRelation sequenceRelation;
 
@@ -148,29 +149,29 @@ public class DtoGeneratorConfig {
 				Config.throwValidateError("isRogicalDeleteFlag と isOptimisticLockKey は同時に設定できません。");
 			if (colNameResolver != null) colNameResolver.validate(pos);
 			if (converter != null) converter.validate(pos);
-			if (enumRelation != null) enumRelation.validate(pos);
+//			if (enumRelation != null) enumRelation.validate(pos);
 			if (sequenceRelation != null) sequenceRelation.validate(pos);
 		}
 	}
 
 
-	public static class EnumRelation {
-
-		@XmlAttribute(name="baseClassName")
-		public String baseClassName;
-
-		@XmlAttribute(name="enumName")
-		public String enumName;
-
-		public void validate(String pos) {
-			Config.CheckRequired(baseClassName, pos + "/enumRelation@baseClassName");
-			Config.CheckRequired(enumName, pos + "/enumRelation@enumName");
-		}
-
-		public String toString() {
-			return baseClassName + "." + enumName;
-		}
-	}
+//	public static class EnumRelation {
+//
+//		@XmlAttribute(name="baseClassName")
+//		public String baseClassName;
+//
+//		@XmlAttribute(name="enumName")
+//		public String enumName;
+//
+//		public void validate(String pos) {
+//			Config.CheckRequired(baseClassName, pos + "/enumRelation@baseClassName");
+//			Config.CheckRequired(enumName, pos + "/enumRelation@enumName");
+//		}
+//
+//		public String toString() {
+//			return baseClassName + "." + enumName;
+//		}
+//	}
 
 	public static class SequenceRelation {
 
@@ -258,12 +259,12 @@ public class DtoGeneratorConfig {
 		return null;
 	}
 
-	public EnumRelation getColEnumRelation(String tblName, String colName) {
-		TableSetting t = getTableSEtting(tblName);
-		if (t != null)
-			return t.getColEnumRelation(colName);
-		return null;
-	}
+//	public EnumRelation getColEnumRelation(String tblName, String colName) {
+//		TableSetting t = getTableSEtting(tblName);
+//		if (t != null)
+//			return t.getColEnumRelation(colName);
+//		return null;
+//	}
 
 	public ColumnSetting getColumnSetting(String tblName, String colName) {
 		TableSetting t = getTableSEtting(tblName);

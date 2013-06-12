@@ -12,8 +12,8 @@ import java.util.List;
 import jp.gr.java_conf.sqlutils.date.SqlDate;
 import jp.gr.java_conf.sqlutils.date.SqlTime;
 import jp.gr.java_conf.sqlutils.generator.dto.config.ColValueConverter;
+import jp.gr.java_conf.sqlutils.generator.dto.config.ColValueConverter.EnumConverterWrapper;
 import jp.gr.java_conf.sqlutils.generator.dto.config.ColumnNameResolvers;
-import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.EnumRelation;
 import jp.gr.java_conf.sqlutils.generator.dto.config.TableNameResolvers;
 import jp.gr.java_conf.sqlutils.generator.jdbc.ColumnInfo;
 import jp.gr.java_conf.sqlutils.generator.jdbc.TableInfo;
@@ -100,26 +100,35 @@ public class DtoGeneratorPlugin {
 		col.definitionName = resolver.definitionNameResolver.resolve(col.name);
 
 		// DTOフィールドの型および変換式
-		// Enum
-		EnumRelation enumSetting = DtoGenerator.CONFIG.getColEnumRelation(col.tblName, col.name);;
-		if (enumSetting != null) {
-			ColValueConverter c = new ColValueConverter();
-			String baseClass = DtoGenerator.ENUM_CONFIG.package_ + "." + enumSetting.baseClassName;
-			String enumClass = baseClass + "." + enumSetting.enumName;
-			c.dtoFieldClassType = enumClass;
-			c.setToDtoConversion = "val == null ? null : " + baseClass + ".get(" + enumClass + ".class, val)";
-			c.getFromDtoConversion = "this." + ColValueConverter.FIELDNAME_PLACEHOLDER + " == null ? null : this." + ColValueConverter.FIELDNAME_PLACEHOLDER + ".getValue()";
-			col.converter = c;
-
-		} else {
-			// 指定されたコンバータ
-			ColValueConverter c = DtoGenerator.CONFIG.getColValueConverter(col.tblName, col.name);
-			if (c != null)
-				col.converter = c;
+		ColValueConverter c = DtoGenerator.CONFIG.getColValueConverter(col.tblName, col.name);
+		if (c != null)
+			if (c instanceof EnumConverterWrapper)
+				col.converter = ((EnumConverterWrapper) c).resolve(DtoGenerator.ENUM_CONFIG.package_);
 			else
-				// JDBCデータ型から決定
-				col.converter = getDataTypeConverter(rs, dbmd);
-		}
+				col.converter = c;
+		else
+			// JDBCデータ型から決定
+			col.converter = getDataTypeConverter(rs, dbmd);
+//		// Enum
+//		EnumRelation enumSetting = DtoGenerator.CONFIG.getColEnumRelation(col.tblName, col.name);;
+//		if (enumSetting != null) {
+//			ColValueConverter c = new ColValueConverter();
+//			String baseClass = DtoGenerator.ENUM_CONFIG.package_ + "." + enumSetting.baseClassName;
+//			String enumClass = baseClass + "." + enumSetting.enumName;
+//			c.dtoFieldClassType = enumClass;
+//			c.setToDtoConversion = "val == null ? null : " + baseClass + ".get(" + enumClass + ".class, val)";
+//			c.getFromDtoConversion = "this." + ColValueConverter.FIELDNAME_PLACEHOLDER + " == null ? null : this." + ColValueConverter.FIELDNAME_PLACEHOLDER + ".getValue()";
+//			col.converter = c;
+//
+//		} else {
+//			// 指定されたコンバータ
+//			ColValueConverter c = DtoGenerator.CONFIG.getColValueConverter(col.tblName, col.name);
+//			if (c != null)
+//				col.converter = c;
+//			else
+//				// JDBCデータ型から決定
+//				col.converter = getDataTypeConverter(rs, dbmd);
+//		}
 
 		return col;
 	}

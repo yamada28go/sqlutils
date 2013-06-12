@@ -99,14 +99,14 @@ public class ${className} implements IGeneratedDto,#if(${tbl.persistable}) IPers
 #if(${col.optimisticLockKey})
 	 * used as optimistic-lock-key
 #end
-#if(${col.relatedEnum})
-	 * related with value-enum : ${col.relatedEnum}
-#end
+##if(${col.relatedEnum})
+#	 * related with value-enum : ${col.relatedEnum}
+##end
 	 * </pre>
 	 * @see java.sql.Types
-#if(${col.relatedEnum})
-	 * @see ${col.dtoFieldClassType}
-#end
+##if(${col.relatedEnum})
+#	 * @see ${col.dtoFieldClassType}
+##end
 	 */
 	public ${col.dtoFieldClassType} ${col.dtoFieldName} = null;
 
