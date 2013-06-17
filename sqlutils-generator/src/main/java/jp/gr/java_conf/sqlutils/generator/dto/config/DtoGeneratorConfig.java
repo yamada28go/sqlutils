@@ -88,7 +88,7 @@ public class DtoGeneratorConfig {
 //			return null;
 //		}
 
-		public ColValueConverter getColValueConverter(String colName) {
+		public IColValueConverter getColValueConverter(String colName) {
 			ColumnSetting c = getColumnSetting(colName);
 			if (c != null)
 				return c.converter;
@@ -131,12 +131,12 @@ public class DtoGeneratorConfig {
 		public ColumnNameResolvers colNameResolver;
 
 		@XmlElements({
-			@XmlElement(name="converter", type=ColValueConverter.class ),
-			@XmlElement(name="strTrimConverter", type=ColValueConverter.StrTrimConverter.class),
-			@XmlElement(name="intBoolConverter", type=ColValueConverter.IntBoolConverter.class),
-			@XmlElement(name="enumConverter", type=ColValueConverter.EnumConverterWrapper.class)
+			@XmlElement(name="converter", type=IColValueConverter.ColValueConverter.class ),
+			@XmlElement(name="strTrimConverter", type=IColValueConverter.StrTrimConverter.class),
+			@XmlElement(name="intBoolConverter", type=IColValueConverter.IntBoolConverter.class),
+			@XmlElement(name="enumConverter", type=IColValueConverter.EnumConverter.class)
 		})
-		public ColValueConverter converter;
+		public IColValueConverter converter;
 
 //		public EnumRelation enumRelation;
 
@@ -252,7 +252,7 @@ public class DtoGeneratorConfig {
 		return ret;
 	}
 
-	public ColValueConverter getColValueConverter(String tblName, String colName) {
+	public IColValueConverter getColValueConverter(String tblName, String colName) {
 		TableSetting t = getTableSEtting(tblName);
 		if (t != null)
 			return t.getColValueConverter(colName);

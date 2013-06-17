@@ -75,7 +75,7 @@ public interface ${defClassName} {
 		 * default value : "$!{col.defaultValue}"
 		 *
 #if(${col.relatedSequence})
-	 	* auto numbering from sequence : "${col.relatedSequence}"
+	 	 * auto numbering from sequence : "${col.relatedSequence}"
 #end
 #if(${col.logicalDeleteFlag})
 		 * used as logical-delete-flag

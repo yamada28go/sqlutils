@@ -2,7 +2,6 @@ package jp.gr.java_conf.sqlutils.generator.jdbc;
 
 import java.sql.Types;
 
-import jp.gr.java_conf.sqlutils.generator.dto.config.ColValueConverter;
 import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.ColumnSetting;
 import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.SequenceRelation;
 
@@ -23,7 +22,11 @@ public class ColumnInfo {
 	public String dtoFieldName;
 	public String definitionName;
 
-	public ColValueConverter converter;
+//	public ColValueConverter converter;
+	public String dtoFieldClassType;
+	public String setToDtoConversion;
+	public String getFromDtoConversion;
+
 
 	public ColumnSetting setting;
 
@@ -67,6 +70,15 @@ public class ColumnInfo {
 	public boolean isAutoIncrement() {
 		return isAutoIncrement;
 	}
+	public String getDtoFieldClassType() {
+		return dtoFieldClassType;
+	}
+	public String getSetToDtoConversion() {
+		return setToDtoConversion;
+	}
+	public String getGetFromDtoConversion() {
+		return getFromDtoConversion;
+	}
 
 
 
@@ -100,14 +112,5 @@ public class ColumnInfo {
 //	}
 
 
-	public String getDtoFieldClassType() {
-		return converter.dtoFieldClassType;
-	}
-	public String getSetToDtoConversion() {
-		return converter.setToDtoConversion;
-	}
-	public String getGetFromDtoConversion() {
-		return converter.getFromDtoConversion.replace(ColValueConverter.FIELDNAME_PLACEHOLDER, dtoFieldName);
-	}
 
 }

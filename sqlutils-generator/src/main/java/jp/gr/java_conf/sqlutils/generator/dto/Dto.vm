@@ -100,12 +100,12 @@ public class ${className} implements IGeneratedDto,#if(${tbl.persistable}) IPers
 	 * used as optimistic-lock-key
 #end
 ##if(${col.relatedEnum})
-#	 * related with value-enum : ${col.relatedEnum}
+##	 * related with value-enum : ${col.relatedEnum}
 ##end
 	 * </pre>
 	 * @see java.sql.Types
 ##if(${col.relatedEnum})
-#	 * @see ${col.dtoFieldClassType}
+##	 * @see ${col.dtoFieldClassType}
 ##end
 	 */
 	public ${col.dtoFieldClassType} ${col.dtoFieldName} = null;
@@ -187,6 +187,7 @@ public class ${className} implements IGeneratedDto,#if(${tbl.persistable}) IPers
 		return true;
 	}
 
+	// TODO delete from here.
 	private static boolean isEqualCol(Object o1, Object o2) {
 		if (o1 == null && o2 == null)
 			return true;
