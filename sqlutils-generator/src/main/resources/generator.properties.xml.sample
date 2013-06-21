@@ -13,6 +13,7 @@
 	全てはDBMS（＆JDBCドライバ）の実装に従います。
 	よって、この設定ファイル上でテーブル名、カラム名を指定する際には、
 	JDBCからの戻り値とCaseSensitiveにマッチするように注意して下さい。
+	※TODO 次期UpdateでcaseSensitiveNameMatchingを制御する機能を提供予定
 
 	■機能概要
 	データアクセス用のテーブル定義と、データ格納用のDTO（DataTransferObject）を自動生成します。
@@ -46,13 +47,14 @@
 	TODO DATETIME型：JDBCによってはjava.util.Dateを返すものと、java.sql.Timestamp型を返すものがあります
 
 	TIME型に関して：
-	　通常java.sql.Time型が返されるが、このクラスはtoSring()、valueOf()などでミリ秒に対応していません。
-	　このため、ミリ秒まで有意な値を含むTIME型カラムと接続すると、いろいろ問題・混乱のネタになります。
-　　　　この問題を回避するため、TIME型は独自型であるjp.gr.java_conf.sqlutils.date.SqlTime型にバインドします。
-　　　　このクラスはjava.sql.Time型を継承し、かつミリ秒を保持しません（常に0）。
-　　　　これは、一般的な用途として「時分秒のみを扱う」想定で機能を限定する事で、PG上予期せぬ不具合を回避する事を
-　　　　目的としています。逆に正しくミリ秒まで保持したい場合は、コンバータを設定して、
-　　　　jp.gr.java_conf.sqlutils.date.SqlTimeMSec型にバインドして下さい。
+	　java.sql.Time型は、Date型の継承なので内部的にはミリ秒を保持しますが、
+	 toSring()、valueOf()などのメソッドではミリ秒に対応していません。バグ？
+	 SQL99のTIME型はミリ秒まで格納できる規格らしいので、
+	 JDBCの実装次第で、取得時にデータが欠落する可能性があります（Time.valueOf(文字列)でインスタンス生成した場合。longを引数に取るコンストラクタでは問題無い）。
+	　またPreparedStatementを構築する際、通常バインドされたObjectはtoString()で文字列されるので、
+	　この際にミリ秒が欠落するため、適切な条件句にならない恐れが有ります。
+	　この問題を回避するため、TIME型は独自型であるjp.gr.java_conf.sqlutils.date.SqlTime型にバインドします。
+
 
 	●Enumの自動生成
 	名前と値のセットでEnumを構築します。
@@ -81,6 +83,12 @@
 		basePath="fullpath like xxxxx\src\main\java"
 	/>
 
+	<!--
+	TODO 実装予定。
+	false指定する事で、テーブル名やカラム名のマッチングにおいて大文字小文字を無視する。
+	-->
+	<caseSensitiveNameMatching>false</caseSensitiveNameMatching>
+
 	<!-- DTOおよびテーブル定義の生成設定 -->
 	<dtoGenerator
 		package="package name like xx.xx.xx.generated.dto"
@@ -99,6 +107,7 @@
 			<dtoFieldName xsi:type="camelize"/>
 			<definitionName xsi:type="toUpper"/>
 		</defaultColNameResolver>
+
 
 		<!-- テーブル個別の設定 -->
 		<table name="sample_table_1">
@@ -134,12 +143,37 @@
 				<intBoolConverter />
 			</column>
 
-			<column name="delete_flag"
-				isLogicalDeleteFlag="true"><!-- 数値型たはBool型カラムを、論理削除フラグとして扱う。 -->
+			<column name="delete_flag">
+				<!--
+				論理削除フラグとして扱う。
+				trueValue,falseValueは省略可。
+				設定値はコードに埋め込まれるので、適切に指定しないと生成後のDefinitionがビルドエラーになる。
+				例：
+				　数値型の場合：trueValue="1" falseValue="0"
+				　文字型の場合：trueValue='"1"' falseValue='"0"'
+				 -->
+				<logicalDeleteFlag trueValue="true" falseValue="false"/>
 			</column>
 
-			<column name="update_date"
-				isOptimisticLockKey="true"><!-- 数値型たはTimestamp型カラムを、楽観排他ロックのキーとして扱う。 -->
+			<column name="version_no">
+				<!--
+				楽観排他ロックのキーとして扱う。
+				数値型、あるいはDATETIME(TIMESTAMP)型にのみ指定可能。
+				数値の場合は更新時に自動的にカウントアップする。
+				日付型の場合、システム日付を設定する。が、Javaのシステム日付はミリ秒までしか取得できないので、タイムスタンプとしては不足する恐れがあるので注意。
+				 -->
+				<optimisticLockKey />
+			</column>
+
+			<column name="timestamp">
+				<!--
+				TODO 実装する。現状未対応
+				それぞれPersistorを使ったInsert,Update,LogicalDelete時に、
+				このカラムをSQL文から除外する事で、DBMS側で設定されたデフォルト値が適用される想定。
+				 -->
+				<ignoreOnInsert /><!-- INSERTの場合、DTOの値がNullの場合は、この指定が無くともそのカラムは無視される -->
+				<ignoreOnUpdate /><!-- UPDATEの場合、値がNullでもNULLで更新しようとするので、無視したい場合はこの指定が必須 -->
+				<ignoreOnLogicalDelete />
 			</column>
 
 			<column name="code_value"
@@ -151,6 +185,16 @@
 					enumName="name og generated enum" />
 			</column>
 		</table>
+
+		<!--
+		TODO 実装予定。
+		全テーブルカラム対象の設定。カラム名が同じ場合、テーブルに関わりなくそのカラムに対して適用される。
+		-->
+		<columns>
+			<column name="delete_flag">
+				<logicalDeleteFlag />
+			</column>
+		</columns>
 
 	</dtoGenerator>
 
