@@ -26,6 +26,8 @@ public class VelocityUtil {
 			"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		p.setProperty("input.encoding", "UTF-8");
 		p.setProperty("output.encoding", "UTF-8");
+
+		p.setProperty("runtime.references.strict", "true");
 		Velocity.init(p);
 	}
 

@@ -26,7 +26,7 @@ import ${packageName}.${defClassName};
  *
 #if(${tbl.persistable})
  * Persistable:
- *  Available to use Persistor-methods, like DBManager#insert(IPersistable),#update(IPersistable),#delete(IPersistable),else.
+ *  Available to use Persistor-methods, like DBManager\#insert(IPersistable),\#update(IPersistable),\#delete(IPersistable),else.
  *
 #end
 #if(${tbl.optimisticLockKeyCol})
@@ -37,8 +37,8 @@ import ${packageName}.${defClassName};
 #end
 #if(${tbl.logicalDeleteFlagCol})
  * Logical-delete:
- *  Logically deleted at DBManager#delete().
- *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder#containLogicalDeletedRecords().
+ *  Logically deleted at DBManager\#delete().
+ *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder\#containLogicalDeletedRecords().
  *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
  *
 #end
