@@ -39,11 +39,6 @@ public class LogicalDeleteHandler extends AbstractUpdateHandler {
 
 			// Setカラム
 			LinkedHashSet<IColumn<?>> attrCols = new LinkedHashSet<IColumn<?>>();
-//			for (IColumn<?> c : tbl.getCols()) {
-//				if (c.isDelFlag() || c.isOptimisticLockKey()) {
-//					attrCols.add(c);
-//				}
-//			}
 			if (optLockKeyCol != null)
 				attrCols.add(optLockKeyCol);
 			if (logicalDelKeyCol != null)
@@ -60,22 +55,14 @@ public class LogicalDeleteHandler extends AbstractUpdateHandler {
 			if (optLockKeyCol != null)
 				optLockCurrVals.put(optLockKeyCol.name(), dto.get(optLockKeyCol.name()));
 
-//		@SuppressWarnings("unchecked")
-//		T clone = (T) dto.clone();
-
 			String sql = createUpdateSql(tbl.name(appendSchemaToSql), whereCols, attrCols, dto, false);
 
 			List<Object> params = new ArrayList<Object>();
-//			for (IColumn<?> c : attrCols) {
-//				if (c.isDelFlag())
-//					params.add(getDeletedFlagValue());
-//				else if (c.isOptimisticLockKey())
-//					params.add(getOptLockNewValue(c, dto.get(c.name())));
-//			}
 			if (optLockKeyCol != null)
-				params.add(getOptLockNewValue(optLockKeyCol, dto.get(optLockKeyCol.name())));
+				params.add(getOptimisticLockKeyNewValue(optLockKeyCol, dto.get(optLockKeyCol.name())));
 			if (logicalDelKeyCol != null)
-				params.add(getDeletedFlagValue());
+//				params.add(getDeletedFlagValue());
+				params.add(logicalDelKeyCol.getLogicalDeletedValue());
 
 			for (IColumn<?> c : whereCols) {
 				if (c.isPrimaryKey())
