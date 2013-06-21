@@ -2,6 +2,7 @@ package jp.gr.java_conf.sqlutils.core.connection;
 
 import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcess;
+import jp.gr.java_conf.sqlutils.DBManager.PostProcessOnException;
 
 public abstract class TxWithThrowing<E extends Exception> {
 
@@ -11,7 +12,10 @@ public abstract class TxWithThrowing<E extends Exception> {
 	@SuppressWarnings("unchecked")
 	public void execute(DBManager manager) throws E {
 		try {
-			manager.setPostProcess(PostProcess.NONE); // TODO こやって指定しても、子プロセスの中で変更できてしまう
+			// runメソッド内で複数回managerメソッドが呼ばれる使い方を想定しているので、一回毎のPostProcessをNONEに設定
+			// 但しこうしても、run内で設定変更はできてしまうのだが、そこまでブロックはできないので実装任せ。
+			manager.setPostProcess(PostProcess.NONE);
+			manager.setPostProcessOnException(PostProcessOnException.NONE);
 			run(manager);
 			manager.commit();
 		} catch (RuntimeException e) {

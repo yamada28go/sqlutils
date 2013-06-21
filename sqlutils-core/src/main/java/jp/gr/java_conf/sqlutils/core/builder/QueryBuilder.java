@@ -302,7 +302,7 @@ public class QueryBuilder extends ConditionBuilder {
 					w.appendCondition(condition);
 					return this;
 				} else {
-					// TODO
+					// ROOTがOR条件の場合の条件区追加はNGとする
 					throw new RuntimeException("exist rootWhere is Type-OR. So cannot add new condition.");
 				}
 			} else {
