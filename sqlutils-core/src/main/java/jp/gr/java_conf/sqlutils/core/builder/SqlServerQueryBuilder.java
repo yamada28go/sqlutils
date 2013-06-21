@@ -4,6 +4,18 @@ package jp.gr.java_conf.sqlutils.core.builder;
 public class SqlServerQueryBuilder extends QueryBuilder {
 
 
+	/**
+	 * シーケンスはSQLServer2012からのサポート
+	 * SELECT NEXT VALUE FOR Test.DecSeq;
+	 */
+	public String getGetSequenceValSql(String seqName) {
+		return "select next value for " + seqName; // TODO 未検証
+	}
+
+	public String getGetAutoIncrementedValSql() {
+		return "select scope_identity()"; // TODO 未検証
+	}
+
 	public String buildQuery() {
 
 		if (selectables.size() == 0) throw new RuntimeException();

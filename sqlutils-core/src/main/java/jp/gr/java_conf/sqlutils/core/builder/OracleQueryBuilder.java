@@ -4,6 +4,10 @@ package jp.gr.java_conf.sqlutils.core.builder;
 public class OracleQueryBuilder extends QueryBuilder {
 
 
+	public String getGetSequenceValSql(String seqName) {
+		return "select " + seqName + ".nextval from dual";
+	}
+
 	public String buildQuery() {
 
 		if (selectables.size() == 0) throw new RuntimeException();

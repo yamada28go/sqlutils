@@ -835,7 +835,7 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	public String getGetSequenceValSql(String seqName) {
-		return "select " + seqName + ".nextval from dual";
+		return "select nextval('" + seqName + "')";
 	}
 
 
