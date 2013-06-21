@@ -10,8 +10,7 @@ public interface IDto extends Serializable {
 	/**
 	 * DBからJDBCで取得したデータを、DTOインスタンスに格納するためのIF。<br>
 	 * IDtoクラスを自作した場合は、ここに任意の実装を行って下さい。<br>
-	 *
-	 * ユーザロジックからこのメソッドにアクセスする事は想定されていません。<br>
+	 * 通常は変換処理を行うため、ユーザロジックからこのメソッドにアクセスする事は想定されていません。<br>
 	 * ユーザロジックからは、直接フィールドにアクセスして下さい。
 	 *
 	 * @param colName
@@ -23,8 +22,7 @@ public interface IDto extends Serializable {
 	/**
 	 * DBへのInsert処理等の際に、DTOインスタンスから値を取り出すためのIF.<br>
 	 * IDtoクラスを自作した場合は、ここに任意の実装を行って下さい。<br>
-	 *
-	 * ユーザロジックからこのメソッドにアクセスする事は想定されていません。<br>
+	 * 通常は変換処理を行うため、ユーザロジックからこのメソッドにアクセスする事は想定されていません。<br>
 	 * ユーザロジックからは、直接フィールドにアクセスして下さい。
 	 *
 	 * @param colName
@@ -86,4 +84,8 @@ public interface IDto extends Serializable {
 	public interface ILogicalDeleting extends IPersistable {
 	}
 
+//	public interface IDtoField {
+//		String name();
+//		String fullname();
+//	}
 }
