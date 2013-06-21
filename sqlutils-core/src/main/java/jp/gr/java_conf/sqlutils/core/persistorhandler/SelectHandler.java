@@ -42,16 +42,13 @@ public class SelectHandler extends PersistorHandler {
 			for (IColumn<?> c : whereCols) {
 				if (c.isPrimaryKey()) {
 					Object val = dto.get(c.name());
-// jdbcの仕様に従う
-//					if (c.isFixedLenStr())
-//						params.add(StringUtils.rightPad((String)val, c.getSize(), ' '));
-//					else
-						params.add(val);
+					params.add(val);
 				}
 				else
-					params.add(!getDeletedFlagValue());
+//					params.add(!getDeletedFlagValue());
+					params.add(c.getLogicalUnDeletedValue());
 			}
-//			@SuppressWarnings("unchecked")
+
 			Object[] rs = manager.execQuery(new ArrayHandler(), sql, params.toArray());
 			if (rs == null)
 				return null;
@@ -68,14 +65,6 @@ public class SelectHandler extends PersistorHandler {
 			} catch (IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
-//			DtoListHandler<T> handler = new DtoListHandler<T>(dto.getClass());
-//			handler.setColNameParser(new SimpleSqlColNameProvider(sql));
-//			List<T> list = manager.execQuery(handler, sql, params.toArray());
-//			if (list.isEmpty())
-//				return null;
-//			else
-//				return list.get(0);
-
 
 		} catch (NoSuchColumnException e) {
 			throw new RuntimeException("unexpected!");
