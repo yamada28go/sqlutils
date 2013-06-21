@@ -60,12 +60,12 @@ public class DtoGeneratorPlugin {
 	}
 
 	public String getTableRemarks(ResultSet rs, DatabaseMetaData dbmd) throws SQLException {
-		// TODO OracleはNG
+		// TODO Oracleの場合、これでREMARKSは取得できない
 		return rs.getString("REMARKS");
 	}
 
 	public String getColumnRemarks(ResultSet rs, DatabaseMetaData dbmd) throws SQLException {
-		// TODO OracleはNG
+		// TODO Oracleの場合、これでREMARKSは取得できない
 		return rs.getString("REMARKS");
 	}
 
@@ -89,10 +89,6 @@ public class DtoGeneratorPlugin {
 
 		col.isAutoIncrement = rs.getBoolean("IS_AUTOINCREMENT");
 
-		// カラム設定を保持
-		col.setting = DtoGenerator.CONFIG.getColumnSetting(col.tblName, col.name);
-
-
 		// DTOフィールド名
 		ColumnNameResolvers resolver = DtoGenerator.CONFIG.getColNameResolver(col.tblName, col.name);
 		col.dtoFieldName = resolver.dtoFieldNameResolver.resolve(col.name);
@@ -106,34 +102,8 @@ public class DtoGeneratorPlugin {
 		col.setToDtoConversion = c.getSetToDtoConversion();
 		col.getFromDtoConversion = c.getGetFromDtoConversion(col.dtoFieldName);
 
-//		if (c != null)
-//			if (c instanceof EnumConverterWrapper)
-//				col.converter = ((EnumConverterWrapper) c).resolve(DtoGenerator.ENUM_CONFIG.package_);
-//			else
-//				col.converter = c;
-//		else
-//			// JDBCデータ型から決定
-//			col.converter = getDataTypeConverter(rs, dbmd);
-////		// Enum
-////		EnumRelation enumSetting = DtoGenerator.CONFIG.getColEnumRelation(col.tblName, col.name);;
-////		if (enumSetting != null) {
-////			ColValueConverter c = new ColValueConverter();
-////			String baseClass = DtoGenerator.ENUM_CONFIG.package_ + "." + enumSetting.baseClassName;
-////			String enumClass = baseClass + "." + enumSetting.enumName;
-////			c.dtoFieldClassType = enumClass;
-////			c.setToDtoConversion = "val == null ? null : " + baseClass + ".get(" + enumClass + ".class, val)";
-////			c.getFromDtoConversion = "this." + ColValueConverter.FIELDNAME_PLACEHOLDER + " == null ? null : this." + ColValueConverter.FIELDNAME_PLACEHOLDER + ".getValue()";
-////			col.converter = c;
-////
-////		} else {
-////			// 指定されたコンバータ
-////			ColValueConverter c = DtoGenerator.CONFIG.getColValueConverter(col.tblName, col.name);
-////			if (c != null)
-////				col.converter = c;
-////			else
-////				// JDBCデータ型から決定
-////				col.converter = getDataTypeConverter(rs, dbmd);
-////		}
+		// カラム設定を保持
+		col.config = DtoGenerator.CONFIG.getColumnSetting(col.tblName, col.name);
 
 		return col;
 	}
@@ -196,11 +166,14 @@ public class DtoGeneratorPlugin {
 			break;
 
 		case Types.DATE:
+			// Oracle10g-DATE型
 			ret.dtoFieldClassType = SqlDate.class.getName();
 			ret.setToDtoConversion = "val == null ? null : " + SqlDate.class.getName() + ".getInstance((java.util.Date)val)";
 			break;
 
 		case Types.TIMESTAMP:
+			// Oracle10g-TIMESTAMP型
+			// Oracle11g-DATE型、TIMESTAMP型
 			ret.dtoFieldClassType = getTimestampTypeJdbcClass().getName();
 			break;
 

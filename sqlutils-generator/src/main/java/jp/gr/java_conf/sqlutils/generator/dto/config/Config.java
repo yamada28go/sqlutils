@@ -71,6 +71,10 @@ public class Config {
 
 	public EnumGeneratorConfig enumGenerator;
 
+	@XmlAttribute(name="caseSensitiveNameMatching")
+	public boolean caseSensitiveNameMatching; // TODO caseSensitiveNameMatchingの実装
+
+
 
 	public void validate() {
 		db.validate();

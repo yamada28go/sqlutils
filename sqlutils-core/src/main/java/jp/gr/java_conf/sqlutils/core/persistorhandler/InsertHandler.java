@@ -22,7 +22,9 @@ public class InsertHandler extends PersistorHandler {
 
 
 	/**
-	 * @param attrs キーをIColumnにしないのは、複数のテーブルを一つのModifierで対処するには、文字列のほうが都合がよいから。
+	 * オーバライド用のメソッド。
+	 * 定型的な処理、例えばINSERT時に「登録者」にユーザ名を格納する、といった用途に。
+	 * @param attrs キーはカラム名。テーブル横断的に処理するコードを書くには、IColumnは向かないため。
 	 * @param tbl
 	 */
 	protected void modifyValues(Map<String, Object> attrs, ITable tbl) {
@@ -44,9 +46,10 @@ public class InsertHandler extends PersistorHandler {
 				Object val = clone.get(c.name());
 
 				// 値がNullなら、そのカラムに関してはSQL構築しない→default値の有無等はDBMSに委ねる
-				// AutoIncrement型に値が入ってる場合も無視する
+				// isIgnoreOnInsertの場合も無視する
+				// AutoIncrement型は自動的にisIgnoreOnInsert
 				if (val != null
-				&& !c.isAutoIncrement()) {
+				&& !c.isIgnoreOnInsert()) {
 					attrs.put(c.name(), val);
 				}
 				if (c.isAutoIncrement()) {

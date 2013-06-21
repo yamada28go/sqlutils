@@ -92,7 +92,7 @@ public class UpdateHandler extends AbstractUpdateHandler {
 //					}
 //				}
 				if (optLockKeyCol != null)
-					clone.set(optLockKeyCol.name(), getOptLockNewValue(optLockKeyCol, clone.get(optLockKeyCol.name())));
+					clone.set(optLockKeyCol.name(), getOptimisticLockKeyNewValue(optLockKeyCol, clone.get(optLockKeyCol.name())));
 			} catch (NoSuchColumnException e) {
 				throw new RuntimeException("Unexpected", e);
 			}

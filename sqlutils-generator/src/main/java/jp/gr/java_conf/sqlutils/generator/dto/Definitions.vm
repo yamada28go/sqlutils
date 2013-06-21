@@ -22,7 +22,7 @@ public interface ${defClassName} {
 	 *
 #if(${tbl.persistable})
 	 * Persistable:
-	 *  Available to use Persistor-methods, like DBManager#insert(IPersistable),#update(IPersistable),#delete(IPersistable),else.
+	 *  Available to use Persistor-methods, like DBManager\#insert(IPersistable),\#update(IPersistable),\#delete(IPersistable),else.
 	 *
 #end
 #if(${tbl.optimisticLockKeyCol})
@@ -33,8 +33,8 @@ public interface ${defClassName} {
 #end
 #if(${tbl.logicalDeleteFlagCol})
 	 * Logical-delete:
-	 *  Logically deleted at DBManager#delete().
-	 *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder#containLogicalDeletedRecords().
+	 *  Logically deleted at DBManager\#delete().
+	 *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder\#containLogicalDeletedRecords().
 	 *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
 	 *
 #end
@@ -78,7 +78,7 @@ public interface ${defClassName} {
 	 	 * auto numbering from sequence : "${col.relatedSequence}"
 #end
 #if(${col.logicalDeleteFlag})
-		 * used as logical-delete-flag
+		 * used as logical-delete flag
 #end
 #if(${col.optimisticLockKey})
 		 * used as optimistic-lock-key
@@ -92,14 +92,28 @@ public interface ${defClassName} {
 ##		 * @see ${col.dtoFieldClassType}
 ##end
 		 */
-#if(${col.enumVals})
-#set($className = ${dtoPackageName}+"."+${tbl.dtoClassName}+"."+${col.fieldClassName})
-		public final IColumn<${className}> ${col.definitionName} =
-			new Column<${className}>("${col.nameUpper}", "${col.dtoFieldName}", this, ${className}.class, ${col.primaryKey}, ${col.dataTypeChar}, ${col.autoIncrement}, /*${col.logicalDeleteFlag}, ${col.optimisticLockKey},*/#if(${col.relatedSequence}) "${col.relatedSequence}"#else null#end, ${col.size});
-#else
+##if(${col.enumVals})
+##set($className = ${dtoPackageName}+"."+${tbl.dtoClassName}+"."+${col.fieldClassName})
+##		public final IColumn<${className}> ${col.definitionName} =
+##			new Column<${className}>("${col.nameUpper}", "${col.dtoFieldName}", this, ${className}.class, ${col.primaryKey}, ${col.dataTypeChar}, ${col.autoIncrement}, /*${col.logicalDeleteFlag}, ${col.optimisticLockKey},*/#if(${col.relatedSequence}) "${col.relatedSequence}"#else null#end, ${col.size});
+##else
 		public final IColumn<${col.dtoFieldClassType}> ${col.definitionName} =
-			new Column<${col.dtoFieldClassType}>("${col.name}", "${col.dtoFieldName}", this, ${col.dtoFieldClassType}.class, ${col.primaryKey}, ${col.dataTypeChar}, ${col.autoIncrement}, /*${col.logicalDeleteFlag}, ${col.optimisticLockKey},*/#if(${col.relatedSequence}) "${col.relatedSequence}"#else null#end, ${col.size});
-#end
+			new Column<${col.dtoFieldClassType}>("${col.name}", "${col.dtoFieldName}", this,
+				${col.dtoFieldClassType}.class,
+				${col.primaryKey}, // is primaryKey
+				${col.dataTypeChar}, // is Char(Fixed length)
+				${col.autoIncrement}, // is autoIncrement
+				${col.optimisticLockKey}, // is optimisticLockKey
+##				${col.optimisticLockCounter}, // is optimisticLockCounter
+				${col.logicalDeleteFlag}, // is logicalDeleteFlag
+				#if(${col.logicalDeleteFlag})(${col.logicalDeletedValue})#else(null)#end, // value when logically deleted
+				#if(${col.logicalDeleteFlag})(${col.logicalUnDeletedValue})#else(null)#end, // value when not deleted
+				${col.ignoreOnInsert}, // is ignoreOnInsert
+				${col.ignoreOnUpdate}, // is ignoreOnUpdate
+				${col.ignoreOnLogicalDelete}, // is ignoreOnLogicalDelete
+				#if(${col.relatedSequence})("${col.relatedSequence}")#else(null)#end, // related with sequence
+				${col.size}); // size
+##end
 
 #end
 		public IColumn<?>[] getCols() {

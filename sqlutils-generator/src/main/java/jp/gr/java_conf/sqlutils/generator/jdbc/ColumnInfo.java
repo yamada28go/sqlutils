@@ -2,8 +2,8 @@ package jp.gr.java_conf.sqlutils.generator.jdbc;
 
 import java.sql.Types;
 
-import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.ColumnSetting;
-import jp.gr.java_conf.sqlutils.generator.dto.config.DtoGeneratorConfig.SequenceRelation;
+import jp.gr.java_conf.sqlutils.generator.dto.config.ColumnConfig;
+import jp.gr.java_conf.sqlutils.generator.dto.config.SequenceRelation;
 
 public class ColumnInfo {
 
@@ -27,8 +27,11 @@ public class ColumnInfo {
 	public String setToDtoConversion;
 	public String getFromDtoConversion;
 
+	// TODO templateエンジンをVelocityから変更する。候補はmustache.javaあたり。
+	// VelocityはBeansにしか対応してないので、いちいちgetterを用意しないといけないのが面倒
+	// フィールドアクセスできるようになれば、config内へのアクセスも直で書ける
 
-	public ColumnSetting setting;
+	public ColumnConfig config;
 
 
 	public String getSchema() {
@@ -87,30 +90,37 @@ public class ColumnInfo {
 	}
 
 	public boolean isLogicalDeleteFlag() {
-		return setting == null ? false : setting.isLogicalDeleteFlag;
+		return config == null ? false : config.logicalDeleteFlag != null;
+	}
+	public String getLogicalDeletedValue() {
+		return config == null ? null :
+				config.logicalDeleteFlag == null ? null :
+					config.logicalDeleteFlag.deletedValueExpression;
+	}
+	public String getLogicalUnDeletedValue() {
+		return config == null ? null :
+				config.logicalDeleteFlag == null ? null :
+					config.logicalDeleteFlag.undeletedValueExpression;
 	}
 	public boolean isOptimisticLockKey() {
-		return setting == null ? false : setting.isOptimisticLockKey;
+		return config == null ? false : config.optimisticLockKey != null;
 	}
-//	public boolean isSequenceRelated() {
-//		return setting == null ? false :
-//			setting.sequenceRelation == null ? false : true;
+//	public boolean isOptimisticLockCounter() {
+//		return setting == null ? false : setting.optimisticLockCounter != null;
 //	}
+	public boolean isIgnoreOnInsert() {
+		return config == null ? false : config.ignoreOnInsert != null;
+	}
+	public boolean isIgnoreOnUpdate() {
+		return config == null ? false : config.ignoreOnUpdate != null;
+	}
+	public boolean isIgnoreOnLogicalDelete() {
+		return config == null ? false : config.ignoreOnLogicalDelete != null;
+	}
+
 	public SequenceRelation getRelatedSequence() {
-		if (setting != null)
-			return setting.sequenceRelation;
+		if (config != null)
+			return config.sequenceRelation;
 		return null;
 	}
-//	public boolean isEnumRelated() {
-//		return setting == null ? false :
-//			setting.enumRelation == null ? false : true;
-//	}
-//	public EnumRelation getRelatedEnum() {
-//		if (setting != null)
-//			return setting.enumRelation;
-//		return null;
-//	}
-
-
-
 }
