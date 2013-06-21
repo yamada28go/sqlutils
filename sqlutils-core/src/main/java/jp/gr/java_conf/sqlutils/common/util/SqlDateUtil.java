@@ -4,40 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+@Deprecated
 public class SqlDateUtil {
-
-//	public static void test() {
-//
-//		SqlDate d = SqlDate.getInstance(new Date().getTime());
-//		func(d);
-//		func2(d);
-////		func3(d);
-//		SqlTime t = SqlTime.getInstance(new Date().getTime());
-//		func(t);
-////		func2(t);
-//		func3(t);
-//		SqlTimeMSec tm = SqlTimeMSec.getInstance(new Date().getTime());
-//		func(tm);
-////		func2(tm);
-//		func3(tm);
-//
-//		/*
-//		 * TODO Wicket側では引き続きjava.sql.Dateやjava.sql.Timeを使用する
-//		 * 継承関係にあるので、問題は無いはず←ていうかそのように作れ
-//		 */
-//
-//	}
-//	public static void func(Date d) {
-//		System.out.println(d);
-//	}
-//	public static void func2(java.sql.Date d) {
-//		System.out.println(d);
-//	}
-//	public static void func3(java.sql.Time d) {
-//		System.out.println(d);
-//	}
-
-
 
 	public static java.sql.Timestamp getTimestamp() {
 		return getTimestamp(new Date());
