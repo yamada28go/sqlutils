@@ -71,8 +71,8 @@ public class Config {
 
 	public EnumGeneratorConfig enumGenerator;
 
-	@XmlAttribute(name="caseSensitiveNameMatching")
-	public boolean caseSensitiveNameMatching; // TODO caseSensitiveNameMatchingの実装
+//	@XmlAttribute(name="caseSensitiveNameMatching")
+//	public boolean caseSensitiveNameMatching; // caseSensitiveNameMatchingの実装←ちょっと調べればわかるのでやめ
 
 
 
