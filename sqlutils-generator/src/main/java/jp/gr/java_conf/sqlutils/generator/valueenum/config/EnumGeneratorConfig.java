@@ -74,30 +74,6 @@ public class EnumGeneratorConfig {
 		}
 	}
 
-//	public static class NameResolverWrapper {
-//
-//
-//		public static NameResolverWrapper getDefaultEnumNameResolver() {
-//			NameResolverWrapper ret = new NameResolverWrapper();
-//			ret.resolver = DEFAULT_ENUM_NAME_RESOLVER;
-//			return ret;
-//		}
-//
-//		public static NameResolverWrapper getDefaultEnumItemNameResolver() {
-//			NameResolverWrapper ret = new NameResolverWrapper();
-//			ret.resolver = DEFAULT_ENUM_ITEM_NAME_RESOLVER;
-//			return ret;
-//		}
-//
-//		public NameResolver resolver;
-//
-//		public void validate(String pos) {
-////			if (resolver == null) Config.throwValidateError(pos + "/resolver is missing");
-//			resolver.validate(pos);
-//		}
-//	}
-
-
 
 	@XmlAttribute(name="package")
 	public String package_;
@@ -109,7 +85,6 @@ public class EnumGeneratorConfig {
 	public void validate() {
 		Config.CheckRequired(package_, "/enumGenerator@package");
 
-		// TODO チェックとか
 		for(int i = 0; i < tables.size(); i++) {
 			SrcTable tbl = tables.get(i);
 			String pos = "enumGenerator/srcTable[" + i + "]";

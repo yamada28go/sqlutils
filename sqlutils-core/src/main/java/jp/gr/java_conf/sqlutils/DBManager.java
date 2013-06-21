@@ -314,16 +314,33 @@ public class DBManager {
 	// for Override
 
 	protected QueryRunner newQueryRunner() {
-		return new QueryRunner() {
+
+		/**
+		 * DBUtilsのQueryRunnerは、PreparedStatementの構築時に事前にメタデータを取得してデータ型の変換を試みるが、
+		 * 一部のDBMS(あるいはVerの古いJDBCとか)はこれに対応せず、Exceptionを投げるため、
+		 * この前処理を回避するには、コンストラクタの引数をtrueに設定する事。
+		 *
+		 * 任意にOverrideして下さい（Factoryクラスを用意する事を推奨）。
+		 */
+		return new QueryRunner(false) {
+
+			/**
+			 * PreparedStatementを構築する際に呼ばれる
+			 */
 			protected PreparedStatement prepareStatement(Connection conn, String sql) throws SQLException {
-//				if (dbms == DBMS.POSTGRES) {
-				if ("POSTGRES".equals(dbms)) {
-					if (fetchSize == 0)
-						logger.warn("フェッチサイズが’0’です。Postgresでは、0＝全件取得となり、対象データが大量にある場合、パフォーマンスに問題を与えます。'DBManager.setFetchSize(n)'で任意のフェッチサイズを明示する事をお勧めします。");
-					conn.setAutoCommit(false); // PostgresでsetFetchSizeを有効にするための設定
-				}
+
+				// 通常意味無いが、PostgresでsetFetchSizeを有効にするためには必須
+				conn.setAutoCommit(false);
+
+				// ReadOnly
 				PreparedStatement stmt = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+				// FetchSize：常に固定でも構わないと思うが、fetchSizeフィールドから取得するようにすれば、実行毎に制御可能。
 				stmt.setFetchSize(fetchSize);
+				if (fetchSize == 0)
+					logger.warn("フェッチサイズが’0’です。’0’は通常、DBMSからJDBCに全件渡されるため、リソースを逼迫する恐れがあります。");
+
+
 //				stmt.setMaxRows(maxRows);
 //				stmt.setQueryTimeout(queryTimeout);
 				return stmt;
@@ -518,13 +535,7 @@ public class DBManager {
 	 * 通常はこのメソッドを外部から直接利用する事は想定されない。
 	 */
 	public Number getAutoIncrementedVal() {
-		String sql = QueryBuilder.get(dbms).getGetAutoIncrementedValSql();;
-//		switch(dbms) {
-//		case MYSQL:		sql = "select last_insert_id()"; break;
-//		case SQLSERVER:	sql = "select scope_identity()"; break; // TODO 未検証
-//		default:
-//			throw new RuntimeException("Unexpected, or please override.");
-//		}
+		String sql = QueryBuilder.get(dbms).getGetAutoIncrementedValSql();
 		return (Number) execQuery(new ScalarHandler(1), sql);
 	}
 

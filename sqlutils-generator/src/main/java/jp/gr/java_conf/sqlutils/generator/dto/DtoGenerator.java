@@ -61,9 +61,7 @@ public class DtoGenerator {
 		SCHEMA = config.db.schema;
 		OUTPUT_BASE = config.output.basePath;
 
-
-		// Plugin TODO
-//		if ("".equals(settings.db.dbms))
+		// Plugin
 		DtoGenerator.PLUGIN = new DtoGeneratorPlugin();
 
 	}
