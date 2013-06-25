@@ -76,13 +76,20 @@ public class Config {
 
 
 
-	public void validate() {
+	public void preCheck() {
 		db.validate();
 		output.validate();
 		if (enumGenerator != null)
-			enumGenerator.validate();
+			enumGenerator.preCheck();
 		if (dtoGenerator != null)
-			dtoGenerator.validate();
+			dtoGenerator.preCheck();
+	}
+
+	public void postCheck() {
+		if (enumGenerator != null)
+			enumGenerator.postCheck();
+		if (dtoGenerator != null)
+			dtoGenerator.postCheck();
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class TableConfig {
 
@@ -13,7 +14,6 @@ public class TableConfig {
 	 * 他方JDBCのメタデータから取得したテーブル名が大文字だったり小文字だったり（DBMS次第？ドライバも？）するので、
 	 * そちらがどっちで返すかをわかっていないと、xml上で設定したつもりが実際にはテーブル名アンマッチで無視される可能性が
 	 * 考えられる。
-	 * TODO 使われなかった設定があった場合にチェックする機構をつけるか？
 	 */
 
 	@XmlAttribute(name="name")
@@ -25,6 +25,9 @@ public class TableConfig {
 
 	@XmlElement(name="column")
 	public List<ColumnConfig> cols = new ArrayList<ColumnConfig>();
+
+	@XmlTransient
+	private List<ColumnConfig> usedColConfigs = new ArrayList<ColumnConfig>();
 
 
 //	@XmlTransient
@@ -38,7 +41,7 @@ public class TableConfig {
 
 
 	// ex: pos = "table[n]"
-	public void validate(String pos) {
+	public void preCheck(String pos) {
 		Config.CheckRequired(name, pos + "@name");
 		if (tblNameResolver != null) tblNameResolver.validate(pos);
 		if (defaultColNameResolver != null) defaultColNameResolver.validate(pos);
@@ -92,6 +95,16 @@ public class TableConfig {
 		}
 	}
 
+	public void postCheck(String pos) {
+		// 使用されなかったColumnConfigがある場合、名称ミスの可能性があるので弾く。
+		for (int i = 0; i < cols.size(); i++) {
+			ColumnConfig c = cols.get(i);
+			String cPos = pos + "/col[" + i + "]";
+			if (!usedColConfigs.contains(c))
+				throw new RuntimeException(cPos + " is not used. : " + c.name);
+		}
+	}
+
 	public IColValueConverter getColValueConverter(String colName) {
 		ColumnConfig c = getColumnSetting(colName);
 		if (c != null)
@@ -112,9 +125,11 @@ public class TableConfig {
 	ColumnConfig getColumnSetting(String colName) {
 		for (ColumnConfig c : cols) {
 			if (c.name.equals(colName)) {
+				usedColConfigs.add(c);
 				return c;
 			}
 		}
 		return null;
 	}
+
 }

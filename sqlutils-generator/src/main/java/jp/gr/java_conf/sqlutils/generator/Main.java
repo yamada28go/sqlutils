@@ -83,8 +83,7 @@ public class Main {
 //				Config config = JAXB.unmarshal(new File(path), Config.class);
 
 				// 設定内容の妥当性をチェック
-				config.validate();
-
+				config.preCheck();
 
 				if (config.enumGenerator != null)
 					new EnumGenerator(config).generate();
@@ -92,6 +91,7 @@ public class Main {
 				if (config.dtoGenerator != null)
 					new DtoGenerator(config).generate();
 
+				config.postCheck();
 				logger.debug("OK : ");
 
 			} catch (Exception e) {

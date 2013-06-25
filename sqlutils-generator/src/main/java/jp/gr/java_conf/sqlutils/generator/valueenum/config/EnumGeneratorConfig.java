@@ -82,7 +82,7 @@ public class EnumGeneratorConfig {
 	public List<SrcTable> tables;
 
 
-	public void validate() {
+	public void preCheck() {
 		Config.CheckRequired(package_, "/enumGenerator@package");
 
 		for(int i = 0; i < tables.size(); i++) {
@@ -90,5 +90,9 @@ public class EnumGeneratorConfig {
 			String pos = "enumGenerator/srcTable[" + i + "]";
 			tbl.validate(pos);
 		}
+	}
+
+	public void postCheck() {
+		//
 	}
 }
