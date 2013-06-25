@@ -3,6 +3,7 @@ package jp.gr.java_conf.sqlutils.core.connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -31,17 +32,17 @@ public class SimpleConnectionProvider implements IConnectionProvider {
 	private class DefaultFactory implements IFactory {
 		private String driverName;
 		private String url;
-		private String user;
-		private String pass;
-		public DefaultFactory(String driverName, String url, String user, String pass) {
+		private Properties props;
+//		private String user;
+//		private String pass;
+		public DefaultFactory(String driverName, String url, Properties props) {
 			this.driverName = driverName;
 			this.url = url;
-			this.user = user;
-			this.pass = pass;
+			this.props = props;
 		}
 		public Connection create() throws Exception {
 			Class.forName(driverName);
-			return DriverManager.getConnection(url, user, pass);
+			return DriverManager.getConnection(url, props);
 		}
 	}
 
@@ -68,7 +69,19 @@ public class SimpleConnectionProvider implements IConnectionProvider {
 	 * @param pass
 	 */
 	public SimpleConnectionProvider(String driverName, String url, String user, String pass) {
-		this.factory = new DefaultFactory(driverName, url, user, pass);
+		Properties props = new Properties();
+		props.put("user", user);
+		props.put("password", pass);
+		this.factory = new DefaultFactory(driverName, url, props);
+	}
+
+	/**
+	 * @param driverName
+	 * @param url
+	 * @param props
+	 */
+	public SimpleConnectionProvider(String driverName, String url, Properties props) {
+		this.factory = new DefaultFactory(driverName, url, props);
 	}
 
 	/**

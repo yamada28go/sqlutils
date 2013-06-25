@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.common.ValueEnum.IValueEnum;
@@ -50,10 +51,14 @@ public class DtoGenerator {
 	public DtoGenerator(Config config) {
 
 		// DBManager
+		Properties props = new Properties();
+		props.put("user", config.db.user);
+		props.put("password", config.db.pass);
+		props.put("remarksReporting", "true"); // TODO Oracleの場合、これを有効にしないとコメント情報が取れない模様だが未確認
 		DBManager.init(
 			config.db.dbms,
 			new SimpleConnectionProvider(
-					config.db.driver, config.db.url, config.db.user, config.db.pass));
+					config.db.driver, config.db.url, props));
 
 		// Config
 		CONFIG = config.dtoGenerator;

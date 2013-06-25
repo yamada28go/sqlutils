@@ -19,6 +19,7 @@ public interface ${defClassName} {
 	 * <pre>
 	 * schema name : "${schema}"
 	 * table name  : "${tbl.name}"
+	 * remarks     : "$!{tbl.remarks}"
 	 *
 #if(${tbl.persistable})
 	 * Persistable:
@@ -73,6 +74,7 @@ public interface ${defClassName} {
 		 * type-name     : ${col.dataTypeName}
 		 * size          : ${col.size}
 		 * default value : "$!{col.defaultValue}"
+		 * remarks       : "$!{col.remarks}"
 		 *
 #if(${col.relatedSequence})
 	 	 * auto numbering from sequence : "${col.relatedSequence}"

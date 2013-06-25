@@ -60,12 +60,10 @@ public class DtoGeneratorPlugin {
 	}
 
 	public String getTableRemarks(ResultSet rs, DatabaseMetaData dbmd) throws SQLException {
-		// TODO Oracleの場合、これでREMARKSは取得できない
 		return rs.getString("REMARKS");
 	}
 
 	public String getColumnRemarks(ResultSet rs, DatabaseMetaData dbmd) throws SQLException {
-		// TODO Oracleの場合、これでREMARKSは取得できない
 		return rs.getString("REMARKS");
 	}
 
