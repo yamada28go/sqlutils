@@ -291,6 +291,11 @@ public class ConditionBuilder {
 			return equal(col, val);
 	}
 
+	public static <T> IConditionElement isNull(IConditionColumn<T> col) {
+		return equalWithNullCase(col, null);
+	}
+
+	@Deprecated // use isNull instead.
 	public static <T> IConditionElement equalNull(IConditionColumn<T> col) {
 		return equalWithNullCase(col, null);
 	}
@@ -309,7 +314,12 @@ public class ConditionBuilder {
 			return notEqual(col, val);
 	}
 
+	@Deprecated // use isNotNull instead.
 	public static <T> IConditionElement notEqualNull(IConditionColumn<T> col) {
+		return notEqualWithNullCase(col, null);
+	}
+
+	public static <T> IConditionElement isNotNull(IConditionColumn<T> col) {
 		return notEqualWithNullCase(col, null);
 	}
 
