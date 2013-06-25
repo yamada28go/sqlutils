@@ -84,4 +84,16 @@ public class ColumnConfig {
 //		if (enumRelation != null) enumRelation.validate(pos);
 		if (sequenceRelation != null) sequenceRelation.validate(pos);
 	}
+
+
+	void merge(ColumnConfig gc) {
+		if (colNameResolver == null) colNameResolver = gc.colNameResolver;
+		if (converter == null) converter = gc.converter;
+		if (ignoreOnInsert == null) ignoreOnInsert = gc.ignoreOnInsert;
+		if (ignoreOnUpdate == null) ignoreOnUpdate = gc.ignoreOnUpdate;
+		if (ignoreOnLogicalDelete == null) ignoreOnLogicalDelete = gc.ignoreOnLogicalDelete;
+		if (logicalDeleteFlag == null) logicalDeleteFlag = gc.logicalDeleteFlag;
+		if (optimisticLockKey == null) optimisticLockKey = gc.optimisticLockKey;
+		if (sequenceRelation == null) sequenceRelation = gc.sequenceRelation;
+	}
 }

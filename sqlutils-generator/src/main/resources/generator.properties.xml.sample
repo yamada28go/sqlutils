@@ -53,8 +53,6 @@
 	converterを指定して、任意の型を設定する事も可能です。
 	※converterは、フィールド型と、JDBCの戻り型からその型への変換式、その型からJDBC型への変換式、の3点が必要です。
 
-	TODO DATETIME型：JDBCによってはjava.util.Dateを返すものと、java.sql.Timestamp型を返すものがあります
-
 	TIME型に関して：
 	　java.sql.Time型は、Date型の継承なので内部的にはミリ秒を保持しますが、
 	 toSring()、valueOf()などのメソッドではミリ秒に対応していません。バグ？
@@ -186,9 +184,11 @@
 			</column>
 
 			<column name="code_value"
-				<!-- enumGenerator機能で生成されるEnumと紐付ける。 -->
-				<!-- コンバータの一種。数値型あるいは文字型のカラムの値を、DTO上では紐づられたEnumの型として扱う。 -->
-				<!-- ここでは名前変換を一切しないので、enumNameは、Enum生成側の設定の結果導出されるEnum名で指定する事 -->
+				<!--
+				enumGenerator機能で生成されるEnumと紐付けるコンバータ。
+				数値型あるいは文字型のカラムの値を、DTO上では紐づられたEnumの型として扱う。
+				ここでは名前変換を一切しないので、enumNameは、Enum生成側の設定の結果導出されるEnum名で指定する事
+				 -->
 				<enumConverter
 					baseClassName="name of generated enum class"
 					enumName="name og generated enum" />
@@ -196,9 +196,9 @@
 		</table>
 
 		<!--
-		TODO 実装予定。
-		全テーブルカラム対象の設定。カラム名が同じ場合、テーブルに関わりなくそのカラムに対して適用される。
-		-->
+		全テーブルを対象にしたカラム設定。
+		設定できる内容は、テーブル別設定時と同じ。設定が重複した場合は、テーブル別設定が優先される。
+		 -->
 		<columns>
 			<column name="delete_flag">
 				<logicalDeleteFlag />

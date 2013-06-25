@@ -75,12 +75,30 @@ public class DtoGeneratorConfig {
 	}
 
 	public ColumnConfig getColumnSetting(String tblName, String colName) {
-		/*
-		 * TODO columnsで設定された全テーブルのカラム対象の一括設定、とのマージ
-		 */
+
+		ColumnConfig gc = getGlobalColumnSetting(colName);
+		ColumnConfig c = null;
+
 		TableConfig t = getTableSetting(tblName);
 		if (t != null)
-			return t.getColumnSetting(colName);
+			c = t.getColumnSetting(colName);
+
+		if (c == null)
+			return gc;
+		else if (gc == null)
+			return c;
+		else {
+			c.merge(gc);
+			return c;
+		}
+	}
+
+	private ColumnConfig getGlobalColumnSetting(String colName) {
+		for (ColumnConfig c : columns) {
+			if (c.name.equals(colName)) {
+				return c;
+			}
+		}
 		return null;
 	}
 
