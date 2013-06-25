@@ -320,10 +320,6 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 // HAVING句の中身は、規定するのが困難なので、自由入力を前提とする
-//	public QueryBuilder2 having(IConditionElement condition) {
-//		this.rootHaving = condition;
-//		return this;
-//	}
 	public QueryBuilder having(String condition) {
 		throwIf(this.offset != null, "Offset statement is already setted.");
 		if (this.having != null) throw new RuntimeException("Having statement is already setted.");
@@ -354,16 +350,6 @@ public class QueryBuilder extends ConditionBuilder {
 		return this;
 	}
 
-//	/**
-//	 * supported by Oracle,Postgres
-//	 */
-//	public QueryBuilder forUpdateOf(ISelectColumn...cols) {
-//		this.forUpdate = true;
-//		this.forUpdateOfs = cols;
-//		return this;
-//	}
-
-
 
 	protected void throwIf(boolean condition, String errMsg) {
 		if (condition) throw new RuntimeException(errMsg);
@@ -379,15 +365,6 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 
-//	/**
-//	 * Select文のカラムに別名（「 as <テーブル名>___<カラム名>」）を付けるか否か
-//	 * defaultは、複数テーブルをJoinしていた場合に、区別のために付加される。
-//	 * よって、常にfalseを返すような上書きをすると、区別できなくなるため正常動作しないので注意
-//	 * 通常は、デフォルト値のままか、あるいは常にTrueを返すよううわがく事
-//	 */
-//	protected boolean isAppendAsStmt2SelectColSql() {
-//		return joins.size() > 0;
-//	}
 
 	/**
 	 * Select文中のテーブル名の前にスキーマ名を付加するか否か
@@ -395,24 +372,6 @@ public class QueryBuilder extends ConditionBuilder {
 	protected boolean isAppendSchemaName() {
 		return false;
 	}
-
-
-
-//	public void appendWhere(IConditionElement c) {
-//		if (rootWhere == null) {
-//			rootWhere = c;
-//			return;
-//		}
-//		if (rootWhere instanceof ConditionElements) {
-//			ConditionElements w = (ConditionElements)rootWhere;
-//			if (w.type == ConditionType.AND) {
-//				w.appendCondition(c);
-//				return;
-//			}
-//		}
-//		IConditionElement t = rootWhere;
-//		rootWhere = new ConditionElements(ConditionType.AND, t, c);
-//	}
 
 	public IConditionElement getWhere() {
 		return rootWhere;
@@ -425,28 +384,6 @@ public class QueryBuilder extends ConditionBuilder {
 			return rootWhere.getArgs();
 	}
 
-//	public String[] getQueryGetColNames() {
-//		List<String> ret = new ArrayList<String>();
-//		if (selectables.get(0) == COLUMN_ALL) {
-//			for (IColumn<?> c : from.tbl.getCols()) {
-//				ret.add(from.name(isAppendSchemaName()) + "." + c.name());
-//			}
-//			for (JoinedTbl j : joins) {
-//				for (IColumn<?> c : j.tbl.tbl.getCols()) {
-//					ret.add(j.tbl.name(isAppendSchemaName()) + "." + c.name());
-//				}
-//			}
-//		} else {
-//			for (IAliasSelectable s : selectables) {
-//				if (s.alias() != null)
-//					ret.add(s.alias());
-//				else
-//					ret.add(s.fullname(isAppendSchemaName()));
-//			}
-//		}
-//		return ret.toArray(new String[0]);
-//	}
-
 
 	public String buildQuery(/*DBMS dbms*/) {
 
@@ -456,24 +393,6 @@ public class QueryBuilder extends ConditionBuilder {
 		if (limit != null && offset == null) throw new RuntimeException();
 
 		prepareLogicalDelete();
-//		if (!containLogicalDeletedRecords) {
-//			if (from.tbl.isLogicalDeleting()) {
-//				IColumn<Boolean> col = getLogicalDelFlagCol(from.tbl);
-//				if (from.alias != null)
-//					where(equal(tblalias(from.alias, col), !getDeletedFlagValue()));
-//				else
-//					where(equal(col, !getDeletedFlagValue()));
-//			}
-//			for (JoinedTbl j : joins) {
-//				if (j.tbl.tbl.isLogicalDeleting()) {
-//					IColumn<Boolean> col = getLogicalDelFlagCol(j.tbl.tbl);
-//					if (j.tbl.alias != null)
-//						where(equal(tblalias(j.tbl.alias, col), !getDeletedFlagValue()));
-//					else
-//						where(equal(col, !getDeletedFlagValue()));
-//				}
-//			}
-//		}
 
 
 		StringBuilder sb = new StringBuilder();
@@ -489,121 +408,39 @@ public class QueryBuilder extends ConditionBuilder {
 		appendForUpdateStmt(sb);
 		return sb.toString();
 
-
-
-//		if ((limit == null && offset == null) // limit,offsetが指定されていない場合
-//		|| (dbms != DBMS.ORACLE && dbms != DBMS.SQLSERVER && dbms != DBMS.SYMFOWARE)) { // あるいは指定されててもOracle、SqlServer以外の場合
-//
-//			appendSelectStmt(sb);
-//			appendFromStmt(sb);
-//			appendJoinStmt(sb);
-//			appendWhereStmt(sb);
-//			appendGroupByStmt(sb);
-//			appendHavingStmt(sb);
-//			appendOrderByStmt(sb);
-//			appendLimitOffsetStmt(sb);
-//			appendForUpdateStmt(sb);
-//			return sb.toString();
-//
-//		} else if (dbms == DBMS.ORACLE || dbms == DBMS.SQLSERVER) {
-//
-//			/*
-//			 * select *
-//			 *  from (
-//			 * 		select
-//			 * 		 SOME_COLUMNS...
-//			 * 		,row_number() over (ORDER BY ..) as ___ROW_NUMBER___
-//			 * 		 from TABLE
-//			 * 		 join TABLES..
-//			 * ) as MAIN___
-//			 * where MAIN___.___ROW_NUMBER___ between FROM and TO;
-//			 */
-//			int from = 0;
-//			int to = 0;
-//			if (dbms == DBMS.ORACLE ) {
-//				from = offset + 1;
-//				to = offset + limit;
-//			} else if (dbms == DBMS.SQLSERVER) {
-//				from = offset * limit + 1;
-//				to = from + limit - 1;
-//			}
-//			sb.append("select * from (");
-//				appendSelectStmt(sb);
-//				sb.append(",row_number() over (");
-//				appendOrderByStmt(sb);
-//				sb.append(") as ").append(getRowNumberColName()).append(" ");
-//				appendFromStmt(sb);
-//				appendJoinStmt(sb);
-//				appendWhereStmt(sb);
-//				appendGroupByStmt(sb);
-//				appendHavingStmt(sb);
-//			sb.append(") MAIN___ "); // テーブルの別名定義に'as'を使うのは、対応してないVerのOracleが居るのでNG
-//			sb.append(" where MAIN___.").append(getRowNumberColName()).append(" between ")
-//				.append(from).append(" and ").append(to);
-//			appendForUpdateStmt(sb);
-//			return sb.toString();
-//
-//		} else if (dbms == DBMS.SYMFOWARE) {
-//
-//			/*
-//			 * select * from (
-//			 * select
-//			 *   <>___<>...
-//			 *   ,rownum as ___ROW_NUMBER___,
-//			 *
-//			 * from (
-//			 * 		select
-//			 * 		 SOME_COLUMN as <>___<>*
-//			 * 		 from TABLE
-//			 * 		 join TABLES..
-//			 * 		 ORDER BY ..
-//			 * ) as SUB___
-//			 * ) as MAIN___
-//			 * where MAIN___.___ROW_NUMBER___ between FROM and TO;
-//			 */
-//			int from = offset + 1;
-//			int to = offset + limit;
-//			sb.append("select * from (");
-//				appendSelectParentStmt(sb);
-//				sb.append(",rownum as ").append(getRowNumberColName()).append(" ");
-//				sb.append("from (");
-//					appendSelectSubStmt(sb);
-//					appendFromStmt(sb);
-//					appendJoinStmt(sb);
-//					appendWhereStmt(sb);
-//					appendGroupByStmt(sb);
-//					appendHavingStmt(sb);
-//					appendOrderByStmt(sb);
-//				sb.append(") SUB___ ");
-//			sb.append(") MAIN___ ");
-//			sb.append(" where MAIN___.").append(getRowNumberColName()).append(" between ")
-//				.append(from).append(" and ").append(to);
-//			appendForUpdateStmt(sb);
-//			return sb.toString();
-//		}
-//		else
-//			throw new RuntimeException("unexpected!");
 	}
 
 
 	protected void prepareLogicalDelete() {
 		if (!containLogicalDeletedRecords) {
-			if (from.tbl./*isLogicalDeleting()*/getLogicalDeleteFlagCol() != null) {
+			if (from.tbl.getLogicalDeleteFlagCol() != null) {
 				@SuppressWarnings("unchecked")
-				IColumn<Boolean> col = /*getLogicalDelFlagCol(from.tbl)*/(IColumn<Boolean>)from.tbl.getLogicalDeleteFlagCol();
+				IColumn<Object> col = (IColumn<Object>) from.tbl.getLogicalDeleteFlagCol();
 				if (from.alias != null)
-					where(equal(tblalias(from.alias, col), !getDeletedFlagValue()));
+//					where(equal(tblalias(from.alias, col), !getDeletedFlagValue()));
+					where(or(
+							isNull(tblalias(from.alias, col)),
+							equal(tblalias(from.alias, col), col.getLogicalUnDeletedValue())));
 				else
-					where(equal(col, !getDeletedFlagValue()));
+//					where(equal(col, !getDeletedFlagValue()));
+					where(or(
+							isNull(col),
+							equal(col, col.getLogicalUnDeletedValue())));
 			}
 			for (JoinedTbl j : joins) {
 				if (j.tbl.tbl./*isLogicalDeleting()*/getLogicalDeleteFlagCol() != null) {
 					@SuppressWarnings("unchecked")
-					IColumn<Boolean> col = /*getLogicalDelFlagCol(j.tbl.tbl)*/ (IColumn<Boolean>)j.tbl.tbl.getLogicalDeleteFlagCol();
+					IColumn<Object> col = (IColumn<Object>)j.tbl.tbl.getLogicalDeleteFlagCol();
 					if (j.tbl.alias != null)
-						where(equal(tblalias(j.tbl.alias, col), !getDeletedFlagValue()));
+//						where(equal(tblalias(j.tbl.alias, col), !getDeletedFlagValue()));
+						where(or(
+								isNull(tblalias(j.tbl.alias, col)),
+								equal(tblalias(j.tbl.alias, col), col.getLogicalUnDeletedValue())));
 					else
-						where(equal(col, !getDeletedFlagValue()));
+//						where(equal(col, !getDeletedFlagValue()));
+						where(or(
+								isNull(col),
+								equal(col, col.getLogicalUnDeletedValue())));
 				}
 			}
 		}
@@ -663,111 +500,7 @@ public class QueryBuilder extends ConditionBuilder {
 		}
 	}
 
-//	protected void appendSelectParentStmt(StringBuilder sb) {
-//		sb.append("select ");
-//		if (selectables.get(0) == COLUMN_ALL) {
-//			int i = 1;
-//			for (@SuppressWarnings("unused") IColumn<?> c : from.tbl.getCols()) {
-////				sb.append(from.name(isAppendSchemaName())).append(getTableColSeparator()).append(c.name());
-//				sb.append("COL").append(i++);
-//				sb.append(",");
-//			}
-//			for (JoinedTbl j : joins) {
-//				for (@SuppressWarnings("unused") IColumn<?> c : j.tbl.tbl.getCols()) {
-////					sb.append(j.tbl.name(isAppendSchemaName())).append(getTableColSeparator()).append(c.name());
-//					sb.append("COL").append(i++);
-//					sb.append(",");
-//				}
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//		} else {
-//			int i = 1;
-//			for (IAliasSelectable s : selectables) {
-////				if (s instanceof SelectFunc) 検証してないけど多分OK
-////					throw new RuntimeException("");
-//
-////				sb.append(s.fullname(isAppendSchemaName()).replace(".", getTableColSeparator()));
-//				if (s.alias() != null)
-//					sb.append(s.alias());
-//				else
-//					sb.append("COL").append(i++);
-//				sb.append(",");
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//		}
-//	}
-//
-//	protected void appendSelectSubStmt(StringBuilder sb) {
-//		sb.append("select ");
-//		if (selectables.get(0) == COLUMN_ALL) {
-//			int i = 1;
-//			for (IColumn<?> c : from.tbl.getCols()) {
-//				sb.append(from.name(isAppendSchemaName())).append(".").append(c.name());
-////				sb.append(" as ").append(from.name(isAppendSchemaName())).append(getTableColSeparator()).append(c.name());
-//				sb.append(" as COL").append(i++);
-//				sb.append(",");
-//			}
-//			for (JoinedTbl j : joins) {
-//				for (IColumn<?> c : j.tbl.tbl.getCols()) {
-//					sb.append(j.tbl.name(isAppendSchemaName())).append(".").append(c.name());
-////					sb.append(" as ").append(j.tbl.name(isAppendSchemaName())).append(getTableColSeparator()).append(c.name());
-//					sb.append(" as COL").append(i++);
-//					sb.append(",");
-//				}
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//		} else {
-//			int i = 1;
-//			for (IAliasSelectable s : selectables) {
-////				if (s instanceof SelectFunc)
-////					throw new RuntimeException("");
-//
-//				sb.append(s.fullname(isAppendSchemaName()));
-//				if (s.alias() != null)
-//					sb.append(" as ").append(s.alias());
-//				else
-//					sb.append(" as COL").append(i++);
-//				sb.append(",");
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//		}
-//	}
 
-//	protected String getTableColSeparator() {
-//		return Const.TBL_COL_SEPARATOR;
-//	}
-
-	/** 'select .....' */
-//	private void appendSelectStmtSub(StringBuilder sb, String parent) {
-//
-//		sb.append("select ");
-////		if (distinct)
-////			sb.append("distinct ");
-//		if (selectables.get(0) == COLUMN_ALL) {
-//			for (IColumn<?> c : from.tbl.getCols()) {
-//				sb.append(parent).append(".").append(c.name());
-//				sb.append(" as ").append(from.name(false)).append(SystemVars.sqlTableColSeparator).append(c.name());
-//				sb.append(",");
-//			}
-//			for (JoinedTbl j : joins) {
-//				for (IColumn<?> c : j.tbl.tbl.getCols()) {
-//					sb.append(parent).append(".").append(c.name());
-//					sb.append(" as ").append(j.tbl.name(false)).append(SystemVars.sqlTableColSeparator).append(c.name());
-//					sb.append(",");
-//				}
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//
-//		} else {
-//			for (IAliasSelectable s : selectables) {
-//				sb.append(s.fullname(isAppendSchemaName()));
-//				if (s.alias() != null)
-//					sb.append(" as ").append(s.alias());
-//				sb.append(",");
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//		}
-//	}
 
 	/** ' from .....' */
 	protected void appendFromStmt(StringBuilder sb) {
@@ -801,8 +534,6 @@ public class QueryBuilder extends ConditionBuilder {
 
 	/** ' having .....' */
 	protected void appendHavingStmt(StringBuilder sb) {
-//		if (rootHaving != null)
-//			sb.append(" having ").append(rootHaving.toQuery());
 		if (having != null)
 			sb.append(" having ").append(having);
 	}
@@ -842,25 +573,6 @@ public class QueryBuilder extends ConditionBuilder {
 	public String getGetAutoIncrementedValSql() {
 		throw new RuntimeException("Not supported!");
 	}
-
-
-//	/**
-//	 * 論理削除機能に対応するカラム型はBooleanのみなので、キャストは保証される（と思う）
-//	 */
-//	@SuppressWarnings("unchecked")
-//	protected IColumn<Boolean> getLogicalDelFlagCol(ITable tbl) {
-//		for (IColumn<?> col : tbl.getCols()) {
-//			if (col.isDelFlag()) {
-//				return (IColumn<Boolean>) col;
-//			}
-//		}
-//		return null;
-//	}
-
-	protected boolean getDeletedFlagValue() {
-		return true;
-	}
-
 
 	public ResultSetParser getResultSetParser() {
 		return new ResultSetParser(getQueryGetColNames());
