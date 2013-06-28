@@ -29,6 +29,7 @@ public class EnumGenerator {
 	public static String SCHEMA;
 	public static String OUTPUT_BASE;
 
+	@SuppressWarnings("deprecation")
 	public EnumGenerator(Config config) {
 
 		// DBManager
@@ -44,6 +45,7 @@ public class EnumGenerator {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public void generate() throws Exception {
 
 		logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");

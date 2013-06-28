@@ -12,6 +12,7 @@ import java.util.Map;
 import jp.gr.java_conf.sqlutils.core.builder.QueryBuilder;
 import jp.gr.java_conf.sqlutils.core.builder.UpdateQueryBuilder;
 import jp.gr.java_conf.sqlutils.core.connection.IConnectionProvider;
+import jp.gr.java_conf.sqlutils.core.connection.ThreadLocalConnectionProvider;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.EightJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FiveJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FourJoinned;
@@ -45,34 +46,40 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * コネクションの生成
- *
- * ■ 対象コネクションが一通りしかないなら、staticメソッドでの初期化＆インスタンス取得が簡単です。
- * ------------------------
- * // 初期化
- * DBManager.init(DBMS.Oracle, provider);
- * // Managerを取得
- * DBManager manager = DBManager.get();
- *
- *
- * ■ ConnectionProviderを使い分けたい場合は、それぞれコンストラクタの引数で指定します。
- * Factoryクラスを用意する事を推奨します。
- * ------------------------
- * DBManager oracleManager = new DBManager(DBMS.Oracle, oracleProvider);
- * DBManager mysqlManager = new DBManager(DBMS.MySQL, mysqlProvider);
- *
- * ※また、Insert/Update時の自動更新日設定といったカスタマイズをするために、
- * 独自拡張したDBManagerを使用する場合も、Factoryクラスを介してインスタンスを生成する手法となります。
+ * DBアクセス管理クラス.
+ * <p>
+ * コネクションの管理と併せて、
+ * {@link QueryBuilder}を介したデータ取得機能、取得したDTOベースの永続化機能、{@link UpdateQueryBuilder}を使った一括更新機能
+ * などを提供する。<br/>
+ * <p/>
+ * <p>
+ * インスタンスとコネクション<br/>
+ * コネクションの生成は、コンストラクタ引数の{@link IConnectionProvider}に従い、通常は<br/>
+ * DBManagerインスタンス：コネクション＝1：1<br/>
+ * となるが、<br/>
+ * {@link ThreadLocalConnectionProvider}を使用する場合は、DBManagerインスタンスに関係無く、<br/>
+ * 同一スレッドに対しては常に同じコネクションが割り当てられる。
+ * この場合、{@link #commit() DBManager#commit}や{@link #close() DBManager#close}は無視されるので、別途スレッドの終端でコネクション管理を行う必要がある。<br/>
+ * <p/>
+ * 拡張ポイント<br/>
+ * <li>{@link #newQueryRunner() newQueryRunner}　
+ * <li>{@link #newInsertHandler(DBManager) newInsertHandler}
+ * <li>{@link #newUpdateHandler(DBManager) newUpdateHandler}
+ * <li>{@link #newDeleteHandler(DBManager) newDeleteHandler}
+ * <li>{@link #newLogicalDeleteHandler(DBManager) newLogicalDeleteHandler}
+ * <li>{@link #newSelectHandler(DBManager) newSelectHandler}
  *
  */
 public class DBManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
 
+	@Deprecated
 	public interface IDBManagerFactory {
 		public DBManager create();
 	}
 
+	@Deprecated
 	public static class DefaultDBManagerFactory implements IDBManagerFactory {
 		private String defaultDbms;
 		private IConnectionProvider defaultProvider;
@@ -90,22 +97,75 @@ public class DBManager {
 		}
 	}
 
-	public enum PostProcess { COMMIT_AND_CLOSE, COMMIT_ONLY, NONE }
-	public enum PostProcessOnException { CLOSE, NONE }
+	/**
+	 * 一回のDBアクセス終了時の挙動
+	 * <li>{@link jp.gr.java_conf.sqlutils.DBManager.PostProcess.COMMIT_ONLY COMMIT_ONLY}
+	 * <li>{@link jp.gr.java_conf.sqlutils.DBManager.PostProcess.COMMIT_AND_CLOSE COMMIT_AND_CLOSE}
+	 * <li>{@link jp.gr.java_conf.sqlutils.DBManager.PostProcess.NONE NONE}
+	 */
+	public enum PostProcess {
+
+		/**
+		 * 一回毎に自動でコミットする（＝DBManager#commit()を呼ぶ）。
+		 * <p>
+		 * コネクション自体はクローズしないので、コネクション（＝インスタンス）を使い回す実装が可能。<br/>
+		 * 但し更新系処理の場合は、{@link jp.gr.java_conf.sqlutils.core.connection.Tx Tx}クラスや{@link jp.gr.java_conf.sqlutils.core.connection.TxWithThrowing TxWithThrowing}クラスを使って明示的にトランザクション境界を設定する事を推奨する。<br/>
+		 * よって使いどころはあまり無い。
+		 * <p/>
+		 * 尚、JDBCから取得したコネクション自体に自動コミット設定がなされている場合もあるので、<br/>
+		 * その場合は{@link IConnectionProvider}の実装に依存する<br/>
+		 * （既存の{@link SimpleConnectionProvider}及び{@link ThreadLocalConnectionProvider}はいずれも{@code setAutoCommit(false)}を行っている）。
+		 */
+		COMMIT_ONLY,
+
+		/**
+		 * 自動コミットに加えて、コネクション自体をクローズする（＝DBManager#close()を呼ぶ）。<br/>
+		 * コネクションの閉じ忘れが無いメリット。但しこの場合、インスタンスの再利用は不可能。
+		 */
+		COMMIT_AND_CLOSE,
+
+		/**
+		 * 何もしない。<br/>
+		 * この場合、明示的にDBManager#commit()、DBManager#close()等を呼ぶ必要がある。<br/>
+		 */
+		NONE
+	}
+
+	/**
+	 * DBアクセス異常終了時の挙動
+	 * <li>{@link jp.gr.java_conf.sqlutils.DBManager.PostProcessOnException.CLOSE CLOSE}
+	 * <li>{@link jp.gr.java_conf.sqlutils.DBManager.PostProcessOnException.NONE NONE}
+	 */
+	public enum PostProcessOnException {
+
+		/**
+		 * コネクションを即座にクローズする（＝DBManager#close()を呼ぶ）。<br/>
+		 */
+		CLOSE,
+
+		/**
+		 * 何もしない。<br/>
+		 */
+		NONE
+	}
 
 
 
+	@Deprecated
 	static IDBManagerFactory factory;
 
 
+	@Deprecated
 	public static void init(final String defaultDbms, final IConnectionProvider defaultProvider) {
 		setFactory(new DefaultDBManagerFactory(defaultDbms, defaultProvider));
 	};
 
+	@Deprecated
 	public static void setFactory(IDBManagerFactory factory) {
 		DBManager.factory = factory;
 	}
 
+	@Deprecated
 	public static DBManager get() {
 		return factory.create();
 	}
@@ -116,9 +176,6 @@ public class DBManager {
 
 	/***********************************************************************************/
 
-	/**
-	 * SimpleConnectionProvider、またはThreadLocalConnectionProvider
-	 */
 	protected IConnectionProvider provider;
 
 	/**
@@ -138,30 +195,27 @@ public class DBManager {
 
 
 	public String dbms;
+
 	protected int fetchSize;
 
-	/**
-	 * PersistorHandlerのFactory。
-	 * Handlerをカスタマイズする場合は、カスタマイズドHandlerを生成するFactoryを設定する事で可能。
-	 */
-
-
-	/** 検索・更新処理後の処置 */
 	protected PostProcess postProcess;
 
-	/** 検索・更新処理でException発生した際の処置 */
 	protected PostProcessOnException postProcessOnException;
 
 
 
+	/**
+	 * コンストラクタ.
+	 * @param dbms QueryBuilderクラスの決定に使用される。 {@link QueryBuilder#get(String) QueryBuilder#get(String)}
+	 * @param provider インスタンス毎にコネクションを供給する。
+	 * @param postProcess 一回のDBアクセス終了時の挙動。但しproviderが{@link ThreadLocalConnectionProvider}の場合は意味は無い。
+	 * @param postProcessOnException DBアクセス例外終了時の挙動。但しproviderが{@link ThreadLocalConnectionProvider}の場合は意味は無い。
+	 */
 	public DBManager(
 			String dbms,
 			IConnectionProvider provider,
 			PostProcess postProcess,
 			PostProcessOnException postProcessOnException) {
-
-		if (dbms == null || provider == null)
-			throw new RuntimeException("DBManager instantiation failed. Param is null.");
 
 		this.dbms = dbms;
 		this.provider = provider;
@@ -170,20 +224,14 @@ public class DBManager {
 		clear();
 	}
 
-
 	protected void clear() {
 		fetchSize = 0;
 	}
 
 	/**
-	 * コネクションをコミットする。
-	 * デフォルトのpostProcessであれば、一回結果・更新処理を呼ぶと内部で自動的にコミット＆クローズされるので、
-	 * このメソッドを呼ぶ必要は無い。
-	 * postProcessを変更した場合は、自身でコミット及びクローズをする必要がある。
-	 *
-	 * ThreadLocalConnectionProviderを使用している場合は、リクエストスレッドの処理終端で
-	 * コミット＆クローズが呼ばれる（←FWレベルでそのように実装されている必要があるが）ので、
-	 * 仮にpostProcessを変更した場合でも、個々の処理でコミットやクローズをする必要は無い。
+	 * コネクションをコミットする.<br/>
+	 * postProcessの設定次第では自動的にコミットされる。<br/>
+	 * あるいは{@link ThreadLocalConnectionProvider}を使用している場合は、これを呼ばなくてもコミットされる（呼んでも無視される）。
 	 *
 	 */
 	public void commit() {
@@ -198,17 +246,14 @@ public class DBManager {
 	}
 
 	/**
-	 * コネクションをロールバックする。
-	 * 通常この処理を明示的に呼び出すケースは想定されない。
-	 *
-	 * ThreadLocalConnectionProviderを使用している場合は、リクエストスレッドの処理終端で
-	 * Exception発生時にはロールバック＆クローズされる。
-	 *
+	 * コネクションをロールバックする.<br/>
+	 * <p>
 	 * SimpleConnectionProviderを使用している場合は、
-	 * jp.gr.java_conf.sqlutils.core.connection.Txクラスを使用すれば、
-	 * Exception発生時にはロールバック＆クローズされる。
+	 * {@link jp.gr.java_conf.sqlutils.core.connection.Tx Tx}クラス等を使用すれば
+	 * Exception発生時には自動的にロールバックされる。
+	 * <p>
+	 * {@link ThreadLocalConnectionProvider}を使用している場合は、これを呼んでも無視される。
 	 *
-	 * @see jp.gr.java_conf.sqlutils.core.connection.Tx
 	 */
 	public void rollback() {
 		if (conn != null) {
@@ -222,8 +267,10 @@ public class DBManager {
 	}
 
 	/**
-	 * コネクションをクローズする。
-	 * 挙動に関しては、コミット処理と同様。
+	 * コネクションをクローズする.<br/>
+	 * postProcessの設定次第では自動的にコミットされる。<br/>
+	 * あるいは{@link ThreadLocalConnectionProvider}を使用している場合は、これを呼ばなくてもコミットされる（呼んでも無視される）。
+	 *
 	 */
 	public void close() {
 		if (conn != null) {
@@ -238,7 +285,7 @@ public class DBManager {
 	}
 
 	/**
-	 * インスタンスに紐付いたコネクションを取得する。
+	 * インスタンスに紐付いたコネクションを取得する.<br/>
 	 *
 	 * 通常はこのメソッドを外部から直接利用する事は想定されない。
 	 */
@@ -274,27 +321,11 @@ public class DBManager {
 		return this;
 	}
 
-	/**
-	 * 検索・更新処理実施後の処置を設定する。
-	 * デフォルトは「コミット＆クローズ」
-	 *
-	 * 単一のDBManagerインスタンスで複数の検索・更新処理を実行するには、設定を変更する必要あり（←クローズされてしまわないよう）
-	 *
-	 */
 	public DBManager setPostProcess(PostProcess postProcess) {
 		this.postProcess = postProcess;
 		return this;
 	}
 
-	/**
-	 * 検索・更新処理実施時にExceptionが発生した場合の処置を設定する。
-	 * デフォルトは「クローズ」
-	 *
-	 * rollback()メソッドと同様に、通常この処理を明示的に呼び出すケースは想定されない。
-	 * ThreadLocalConnectionProviderや、
-	 * jp.gr.java_conf.sqlutils.core.connection.Txクラスに任せれば良い。
-	 *
-	 */
 	public DBManager setPostProcessOnException(PostProcessOnException postProcessOnException) {
 		this.postProcessOnException = postProcessOnException;
 		return this;
@@ -313,6 +344,10 @@ public class DBManager {
 	// ===============================================================
 	// for Override
 
+	/**
+	 * 拡張ポイント.
+	 * @return データ取得時に使用する{@link org.apache.commons.dbutils.QueryRunner QueryRunner}インスタンス
+	 */
 	protected QueryRunner newQueryRunner() {
 
 		/**
@@ -350,25 +385,41 @@ public class DBManager {
 
 
 
+	/**
+	 * @return DTOをInsertする際に使用されるハンドラ
+	 */
 	protected InsertHandler newInsertHandler(DBManager manager) {
 		return new InsertHandler(manager);
 	}
 
+	/**
+	 * @return DTOをUpdateする際に使用されるハンドラ
+	 */
 	protected UpdateHandler newUpdateHandler(DBManager manager) {
 		return new UpdateHandler(manager);
 	}
 
+	/**
+	 * @return DTOをDeleteする際に使用されるハンドラ
+	 */
 	protected DeleteHandler newDeleteHandler(DBManager manager) {
 		return new DeleteHandler(manager);
 	}
 
+	/**
+	 * @return DTOを論理削除する際に使用されるハンドラ
+	 */
+	protected LogicalDeleteHandler newLogicalDeleteHandler(DBManager manager) {
+		return new LogicalDeleteHandler(manager);
+	}
+
+	/**
+	 * @return 主キーを指定してデータ取得する際に使用されるハンドラ
+	 */
 	protected SelectHandler newSelectHandler(DBManager manager) {
 		return new SelectHandler(manager);
 	}
 
-	protected LogicalDeleteHandler newLogicalDeleteHandler(DBManager manager) {
-		return new LogicalDeleteHandler(manager);
-	}
 
 
 
@@ -463,7 +514,7 @@ public class DBManager {
 
 	/**
 	 * 検索処理。
-	 * 結果を返却せず、一件毎にハンドラを呼び出す。
+	 * 結果を返却せず、一件毎にコールバックハンドラを呼び出す。
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void fetchDto(QueryBuilder qw, DtoFetchHandler<? extends IDto> handler) {
@@ -514,8 +565,7 @@ public class DBManager {
 
 
 	/**
-	 * シーケンスを採番し、結果を取得する。
-	 * 通常はこのメソッドを外部から直接利用する事は想定されない。
+	 * シーケンスから値を取得する。現在値ではなく、新規の値。
 	 */
 	public Number getSequenceVal(String seqName) {
 		String sql = QueryBuilder.get(dbms).getGetSequenceValSql(seqName);
@@ -652,7 +702,7 @@ public class DBManager {
 
 
 	/**
-	 * 検索処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルから一件のレコードを取得する。
 	 */
 	public <T extends IPersistable> T selectWithKey(T dto) {
@@ -660,50 +710,38 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルから一件のレコードを取得する。
 	 * 同時に取得されたレコードに対する行ロックを取得する。
 	 */
 	public <T extends IPersistable> T selectWithKey(T dto, boolean forUpdate) {
-		return selectWithKey(dto, newSelectHandler(this), forUpdate);
-	}
-	public <T extends IPersistable> T selectWithKey(T dto, SelectHandler handler, boolean forUpdate) {
-		return handler.exec(dto, forUpdate);
+		return newSelectHandler(this).exec(dto, forUpdate);
 	}
 
 	/**
-	 * 更新処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOを元に、テーブルにレコードをInsertする。
 	 */
 	public <T extends IPersistable> T insert(T dto) {
-		return insert(dto, newInsertHandler(this));
-	}
-	public <T extends IPersistable> T insert(T dto, InsertHandler handler) {
-		return handler.exec(dto);
+		return newInsertHandler(this).exec(dto);
 	}
 
 	/**
-	 * 更新処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOを元に、テーブルにレコードをupdateする。
 	 */
 	public <T extends IPersistable> T update(T dto) {
-		return update(dto, newUpdateHandler(this));
-	}
-	public <T extends IPersistable> T update(T dto, UpdateHandler handler) {
 		return newUpdateHandler(this).exec(dto);
 	}
 
 	/**
-	 * 更新処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOを元に、テーブルにレコードをupdateする。
 	 * 対象テーブルがIOptimisticLockingの場合に、
 	 * 更新結果が0件だった時にはExceptionをスローする（＝他者から先に更新されたものとみなす）。
 	 *
 	 */
 	public <T extends IOptimisticLocking> T update(T dto) throws OptimisticLockingException {
-		return update(dto, newUpdateHandler(this));
-	}
-	public <T extends IOptimisticLocking> T update(T dto, UpdateHandler handler) throws OptimisticLockingException {
 		T ret = newUpdateHandler(this).exec(dto);
 		if (ret != null)
 			return ret;
@@ -712,7 +750,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 更新処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルにレコードをdeleteする。
 	 */
 	public <T extends IPersistable> int delete(T dto) {
@@ -720,7 +758,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 更新処理。
+	 * 永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルにレコードをdeleteする。
 	 * 対象テーブルがIOptimisticLockingの場合に、
 	 * 更新結果が0件だった時にはExceptionをスローする（＝他者から先に更新されたものとみなす）。
