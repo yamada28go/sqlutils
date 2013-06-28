@@ -13,8 +13,6 @@ import org.apache.commons.lang.StringUtils;
 
 public class ConditionBuilder {
 
-//	public static final Condition IGNORE_WITH_NULL = new Condition("DUMMY");
-
 
 	public interface IConditionColumn<T> {
 		String fullname(boolean appendSchema);

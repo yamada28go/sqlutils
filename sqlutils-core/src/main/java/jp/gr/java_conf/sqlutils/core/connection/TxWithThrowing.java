@@ -4,6 +4,15 @@ import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcess;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcessOnException;
 
+/**
+ * トランザクション処理を実現するクラス.<br/>
+ * 内部でException（RuntimeExceptionではない）スローする処理を実装する場合のクラス。
+ *
+ * {@link ThreadLocalConnectionProvider}を使用している場合は、スレッドがトランザクション境界になるので、
+ * このクラスを使う意味は無い。
+ *
+ *
+ */
 public abstract class TxWithThrowing<E extends Exception> {
 
 	protected abstract void run(DBManager manager) throws E;

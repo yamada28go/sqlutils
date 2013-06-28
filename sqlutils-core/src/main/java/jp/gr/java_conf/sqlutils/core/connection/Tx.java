@@ -4,6 +4,14 @@ import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcess;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcessOnException;
 
+/**
+ * トランザクション処理を実現するクラス.<br/>
+ *
+ * {@link ThreadLocalConnectionProvider}を使用している場合は、スレッドがトランザクション境界になるので、
+ * このクラスを使う意味は無い。
+ *
+ *
+ */
 public abstract class Tx {
 
 	protected abstract void run(DBManager manager);

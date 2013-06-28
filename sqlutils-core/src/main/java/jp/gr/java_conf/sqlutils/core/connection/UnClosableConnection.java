@@ -21,6 +21,14 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * コネクションクラスのラッパー<br/>
+ * {@link ThreadLocalConnectionProvider}が返却するクラスで、{@link Connection#commit()}や{@link Connection#close()}などを無視する。
+ * <p>
+ * このクラスのコネクションの制御には、以下のstaticメソッドを呼ぶ必要がある。
+ * <li>{@link ThreadLocalConnectionProvider#setTLConnectionRollback()}
+ * <li>{@link ThreadLocalConnectionProvider#closeTLConnection()}
+ */
 public class UnClosableConnection implements Connection {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnClosableConnection.class);

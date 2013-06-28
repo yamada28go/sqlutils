@@ -14,14 +14,8 @@ import jp.gr.java_conf.sqlutils.core.exception.RuntimeSQLException;
 
 
 /**
- *
- * ■ コネクションプーリングを使わない場合
- * IConnectionProvider　provider = new SimpleConnectionProvider(driverName, url, user, pass);
- *
- * ■ コネクションプーリングを使う場合
- * IConnectionProvider　provider = new SimpleConnectionProvider(datasourceName);
- *
- *
+ * コネクション生成クラス.<br/>
+ * 単純に、DBManagerのインスタンス毎に一つのコネクションを生成する。
  */
 public class SimpleConnectionProvider implements IConnectionProvider {
 
@@ -63,6 +57,8 @@ public class SimpleConnectionProvider implements IConnectionProvider {
 	private IFactory factory;
 
 	/**
+	 * コンストラクタ.<br/>
+	 * コネクションプーリングを使わない場合
 	 * @param driverName
 	 * @param url
 	 * @param user
@@ -76,15 +72,19 @@ public class SimpleConnectionProvider implements IConnectionProvider {
 	}
 
 	/**
+	 * コンストラクタ.<br/>
+	 * コネクションプーリングを使わない場合
 	 * @param driverName
 	 * @param url
-	 * @param props
+	 * @param props 'user'、'password'の他に、JDBC固有のパラメータなどを設定する
 	 */
 	public SimpleConnectionProvider(String driverName, String url, Properties props) {
 		this.factory = new DefaultFactory(driverName, url, props);
 	}
 
 	/**
+	 * コンストラクタ.<br/>
+	 * コネクションプーリングを使用する場合
 	 * @param datasourceName
 	 */
 	public SimpleConnectionProvider(String datasourceName) {
