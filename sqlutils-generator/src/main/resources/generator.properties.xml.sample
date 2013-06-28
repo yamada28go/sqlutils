@@ -90,12 +90,6 @@
 		basePath="fullpath like xxxxx\src\main\java"
 	/>
 
-	<!--
-	TODO 実装予定。
-	false指定する事で、テーブル名やカラム名のマッチングにおいて大文字小文字を無視する。
-	-->
-	<caseSensitiveNameMatching>false</caseSensitiveNameMatching>
-
 	<!-- DTOおよびテーブル定義の生成設定 -->
 	<dtoGenerator
 		package="package name like xx.xx.xx.generated.dto"
@@ -183,7 +177,7 @@
 				<ignoreOnLogicalDelete />
 			</column>
 
-			<column name="code_value"
+			<column name="code_value">
 				<!--
 				enumGenerator機能で生成されるEnumと紐付けるコンバータ。
 				数値型あるいは文字型のカラムの値を、DTO上では紐づられたEnumの型として扱う。
