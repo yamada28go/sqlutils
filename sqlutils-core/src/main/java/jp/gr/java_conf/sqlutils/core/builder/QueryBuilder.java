@@ -24,9 +24,10 @@ import jp.gr.java_conf.sqlutils.core.handler.ResultSetParser;
 
 
 /**
- *
- * static methods
- * use with static-import like
+ * インスタンスメソッドとスタティックメソッドを使って、Selectクエリーを構築する.<br/>
+ * DBMSによる構文の相違などは、このクラスを継承した個別クラスを用意する事で解消する。
+ * <p>
+ * スタティックメソッドの使用の際は、スタティックインポートを使用する事で、コードの短略化が図れる。
  * <pre>
  * import static jp.gr.java_conf.sqlutils.core.builder.QueryBuilder.*;
  * </pre>
@@ -48,14 +49,28 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	/**
-	 * 'count(*)' function
+	 * SELECT句の要素を生成する.<br/>
+	 * COUNT関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(count()).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select count(*) from ..'
 	 */
 	public static SelectFunc count() {
 		return new SelectFunc("count(*)", null);
 	}
 
 	/**
-	 * 'count([col])' function
+	 * SELECT句の要素を生成する.<br/>
+	 * COUNT関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(count(TBL1.COL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select count(TBL1.COL1) from ..'
 	 */
 	public static SelectFunc count(ISelectColumn<?> col) {
 //		return new SelectFunc("count(" + col.fullname() + ")");
@@ -63,7 +78,14 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * 'sum([col])' function
+	 * SELECT句の要素を生成する.<br/>
+	 * SUM関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(sum(TBL1.COL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select sum(TBL1.COL1) from ..'
 	 */
 	public static SelectFunc sum(ISelectColumn<?> col) {
 //		return new SelectFunc("sum(" + col.fullname() + ")");
@@ -71,7 +93,14 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * 'avg([col])' function
+	 * SELECT句の要素を生成する.<br/>
+	 * AVG関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(avg(TBL1.COL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select avg(TBL1.COL1) from ..'
 	 */
 	public static SelectFunc avg(ISelectColumn<?> col) {
 //		return new SelectFunc("avg(" + col.fullname() + ")");
@@ -79,7 +108,14 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * 'max([col])' function
+	 * SELECT句の要素を生成する.<br/>
+	 * MAX関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(max(TBL1.COL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select max(TBL1.COL1) from ..'
 	 */
 	public static SelectFunc max(ISelectColumn<?> col) {
 //		return new SelectFunc("max(" + col.fullname() + ")");
@@ -87,7 +123,14 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * 'min([col])' function
+	 * SELECT句の要素を生成する.<br/>
+	 * MIN関数。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(min(TBL1.COL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select min(TBL1.COL1) from ..'
 	 */
 	public static SelectFunc min(ISelectColumn<?> col) {
 //		return new SelectFunc("min(" + col.fullname() + ")");
@@ -95,10 +138,8 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * select [expression],.... from ....
+	 * SELECT句の要素を生成する.<br/>
 	 * 引数の文字列がそのままSelect句に埋め込まれる。
-	 * SQL関数等を使用したい場合などの用途
-	 * プレーンに取得してから、Javaレベルで加工等することを推奨します。
 	 */
 	public static SelectFunc rawStatement(String expression) {
 		return new SelectFunc(expression, null);
@@ -106,8 +147,15 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	/**
-	 * select TBL.COL1, TBL.COL2,........ from ....
-	 * 指定されたテーブルの全カラムをselect句に展開する
+	 * SELECT句の要素（複数）を生成する.<br/>
+	 * テーブルの全カラムを指定する代わりに、テーブルを指定する事で全カラム分を展開する。
+	 *
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(<b>columns</b>(TBL1)).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select TBL1.COL1,TBL1.COL2,TBL1.COL3... from ..'
 	 */
 	public static ISelectColumn<?>[] columns(ITblElement tbl) {
 		return TblElement.create(tbl).getCols();
@@ -116,8 +164,13 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	/**
-	 * select [col] as [alias],........ from ....
-	 * ColumnにAlias（as句）を明示的に付加する
+	 * カラムに対して別名を設定する.<br/>
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(<b>as</b>(TBL1.COL1, "ALIASNAME")).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select TBL1.COL1 as ALIASNAME from ..'
 	 */
 	public static <T> ColElement<T> as(ISelectColumn<T> col, String alias) {
 		if (col instanceof ColElement) {
@@ -131,8 +184,13 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
-	 * select [function] as [alias],........ from ....
-	 * 関数式にAlias（as句）を明示的に付加する
+	 * 数式に対して別名を設定する.<br/>
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(<b>as</b>(sum(TBL1.COL1), "COL1_SUM")).from(....
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select sum(TBL1.COL1) as COL1_SUM from ..'
 	 */
 	public static SelectFunc as(SelectFunc function, String alias) {
 		if (function.alias != null) throw new RuntimeException();
@@ -142,8 +200,14 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	/**
-	 * select ..... from [tbl] as [alias]
-	 * テーブルにAlias（as句）を付加する
+	 * テーブルに対して別名を設定する.<br/>
+	 * 通常、{@link #tblalias(String, ISelectColumn) tblalias}と同時に使用する。
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(tblalias("T1", TBL1.COL1)).from(<b>as</b>(TBL1, "T1"))
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select T1.COL1 from TBL1 T1'
 	 */
 	public static TblElement as(ITable tbl, String alias) {
 		return new TblElement(tbl, alias);
@@ -151,8 +215,16 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 	/**
-	 * 渡されたColumnをSQLに展開する（[テーブル名].[カラム名]）際に、[テーブル名]を指定されたAliasに置き換える
-	 * Aliasを付けたテーブルのカラムを指定する場合に使用する
+	 * SELECT句の要素を生成する.<br/>
+	 * 別名定義されたテーブル名に合致したカラム名となるよう変換される。
+	 * 通常、{@link #as(ITable, String) as}と同時に使用する。
+	 *
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(<b>tblalias</b>("T1", TBL1.COL1)).from(as(TBL1, "T1"))
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select T1.COL1 from TBL1 T1'
 	 */
 	public static <T> ColElement<T> tblalias(String tblAlias, ISelectColumn<T> col) {
 		if (col instanceof ColElement) {
@@ -167,20 +239,33 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 
+	/**
+	 * ORDER句の要素を生成する.<br/>
+	 * 降順
+	 */
 	public static IOrderElement desc(IOrderColumn col) {
 		return new OrderElement(col, false);
 	}
 
+	/**
+	 * ORDER句の要素を生成する.<br/>
+	 * 昇順
+	 */
 	public static IOrderElement asc(IOrderColumn col) {
 		return new OrderElement(col, true);
 	}
 
+	/**
+	 * ORDER句の要素を生成する.<br/>
+	 * 条件を動的に決定する。
+	 */
 	public static IOrderElement sortWith(IOrderColumn col, boolean isAsc) {
 		return new OrderElement(col, isAsc);
 	}
 
 
 	/**
+	 * ORDER句の要素を生成する.<br/>
 	 * 集計関数の結果カラムでOrderする場合、引数は文字列で指定する
 	 */
 	public static IOrderElement desc(String name) {
@@ -188,6 +273,7 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 	/**
+	 * ORDER句の要素を生成する.<br/>
 	 * 集計関数の結果カラムでOrderする場合、引数は文字列で指定する
 	 */
 	public static IOrderElement asc(String name) {
@@ -224,28 +310,61 @@ public class QueryBuilder extends ConditionBuilder {
 //	private ISelectColumn<?>[] forUpdateOfs;
 	protected boolean containLogicalDeletedRecords;
 
-//	protected String dbms;
 
-
-	public QueryBuilder(/*String dbms*/) {
+	/**
+	 * コンストラクタ
+	 */
+	public QueryBuilder() {
 		selectables = new ArrayList<IAliasSelectable>();
 		joins = new ArrayList<JoinedTbl>();
-//		this.dbms = dbms;
-//		rootWhere = new ConditionElements(ConditionType.AND, null);
 	}
 
+	/**
+	 * SELECT句を構築する.<br/>
+	 * 要素指定を省略し、全カラムを展開したSQLを生成する。
+	 * SELECT句を構築するメソッドは一度しか呼びだす事はできない。
+	 *
+	 * <p>
+	 * Usage:<br/>
+	 * builder.selectAll().from(TBL1)
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select TBL1.COL1,TBL1.COL2.... from TBL1'
+	 */
 	public QueryBuilder selectAll() {
 		throwIf(!this.selectables.isEmpty(), "Select statement is already setted.");
 		this.selectables.add(COLUMN_ALL);
 		return this;
 	}
 
+	/**
+	 * SELECT句を構築する.<br/>
+	 * SELECT句を構築するメソッドは一度しか呼びだす事はできない。
+	 *
+	 * <p>
+	 * Usage:<br/>
+	 * builder.selectDistinct(TBL1.COL1, TBL1.COL2).from(TBL1)
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select distinct TBL1.COL1, TBL1.COL2 from TBL1'
+	 */
 	public QueryBuilder selectDistinct(ISelectColumn<?>...selectables) {
 		throwIf(!this.selectables.isEmpty(), "Select statement is already setted.");
 		this.distinct = true;
 		return select(selectables);
 	}
 
+	/**
+	 * SELECT句を構築する.<br/>
+	 * SELECT句を構築するメソッドは一度しか呼びだす事はできない。
+	 *
+	 * <p>
+	 * Usage:<br/>
+	 * builder.select(TBL1.COL1, TBL1.COL2, sum(TBL1.COL3)).from(TBL1)
+	 * <p>
+	 * then ,generated sql is:<br/>
+	 * 'select TBL1.COL1, TBL1.COL2, sum(TBL1.COL3) from TBL1'
+	 */
 	public QueryBuilder select(ISelectable...selectables) {
 		throwIf(!this.selectables.isEmpty(), "Select statement is already setted.");
 		if (selectables.length == 0) throw new RuntimeException();
@@ -260,6 +379,16 @@ public class QueryBuilder extends ConditionBuilder {
 		return this;
 	}
 
+	/**
+	 * SELECT句を構築する.<br/>
+	 * SELECT句を構築するメソッドは一度しか呼びだす事はできない。
+	 *
+	 * <p>
+	 * builder.select(count()).from(TBL1)
+	 * 
+	 * @Deprecated 冗長メソッドにつき削除予定
+	 */
+	@Deprecated
 	public QueryBuilder selectCountAll() {
 		throwIf(!this.selectables.isEmpty(), "Select statement is already setted.");
 		select(count());

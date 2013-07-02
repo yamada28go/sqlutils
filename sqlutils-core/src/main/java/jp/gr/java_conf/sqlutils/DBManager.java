@@ -12,6 +12,7 @@ import java.util.Map;
 import jp.gr.java_conf.sqlutils.core.builder.QueryBuilder;
 import jp.gr.java_conf.sqlutils.core.builder.UpdateQueryBuilder;
 import jp.gr.java_conf.sqlutils.core.connection.IConnectionProvider;
+import jp.gr.java_conf.sqlutils.core.connection.SimpleConnectionProvider;
 import jp.gr.java_conf.sqlutils.core.connection.ThreadLocalConnectionProvider;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.EightJoinned;
 import jp.gr.java_conf.sqlutils.core.dto.DtoSet.FiveJoinned;
@@ -178,21 +179,7 @@ public class DBManager {
 
 	protected IConnectionProvider provider;
 
-	/**
-	 * SimpleConnectionProviderを使用している場合は、
-	 * DBManagerインスタンス一つに対して、コネクションが一つ割り当てられます。
-	 *
-	 * ThreadLocalConnectionProviderを使用している場合は、コネクションはDBManagerインスタンスに関係無く、
-	 * リクエストスレッド毎に一つが割り当てられます。
-	 * この場合、このコネクションは、DBManager#commit()やDBManager#close()を呼んでも反映されません。
-	 * 代わりにスレッドの終端で、ThreadLocalConnectionProviderのメソッドを呼び出す必要があります。
-	 *
-	 * ThreadLocalConnectionProvider#setTLConnectionRollback
-	 * ThreadLocalConnectionProvider#closeTLConnection
-	 *
-	 */
 	protected Connection conn;
-
 
 	public String dbms;
 
@@ -427,8 +414,21 @@ public class DBManager {
 	// Select-query functions
 
 	/**
-	 * 検索処理。
-	 * 結果をListで返却する。
+	 * QueryBuilderを使用した検索処理.<br/>
+	 * 単一テーブル（DTO）のListを返却する。
+	 *
+	 * <pre>
+	 * {@code
+	 * List<Tbl1> result =
+	 *     manager.getList(
+	 *         builder
+	 *             .select()
+	 *             .from(TBL1)
+	 *             .where(equal(TBL1.COL1, value))
+	 *             .orderBy(asc(TBL1.COL2))
+	 *         ,Tbl1.class);
+	 * }
+	 * </pre>
 	 */
 	public <T extends IDto> List<T> getList(QueryBuilder qw, Class<T> t) {
 		DtoListHandler<T> handler = new DtoListHandler<T>(qw.getResultSetParser(), t);
@@ -436,8 +436,20 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 2つのテーブルをJoinした結果をListで返却する。
+	 *
+	 * <pre>
+	 * {@code
+	 * List<JoinnedDto<Tbl1,Tbl2>> result =
+	 *     manager.getList(
+	 *         builder
+	 *             .select()
+	 *             .from(TBL1)
+	 *             .innerJoin(TBL2, equal(TBL1.COL1, TBL2.COL1))
+	 *         ,Tbl1.class ,Tbl2.class);
+	 * }
+	 * </pre>
 	 */
 	public <T1 extends IDto,T2 extends IDto>
 	List<JoinnedDto<T1,T2>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2) {
@@ -446,8 +458,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 3つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto>
 	List<ThreeJoinned<T1,T2,T3>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3) {
@@ -456,8 +469,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 4つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto,T4 extends IDto>
 	List<FourJoinned<T1,T2,T3,T4>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3, Class<T4> t4) {
@@ -466,8 +480,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 5つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto,T4 extends IDto,T5 extends IDto>
 	List<FiveJoinned<T1,T2,T3,T4,T5>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3, Class<T4> t4, Class<T5> t5) {
@@ -476,8 +491,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 6つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto,T4 extends IDto,T5 extends IDto,T6 extends IDto>
 	List<SixJoinned<T1,T2,T3,T4,T5,T6>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3, Class<T4> t4, Class<T5> t5, Class<T6> t6) {
@@ -486,8 +502,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 7つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto,T4 extends IDto,T5 extends IDto,T6 extends IDto,T7 extends IDto>
 	List<SevenJoinned<T1,T2,T3,T4,T5,T6,T7>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3, Class<T4> t4, Class<T5> t5, Class<T6> t6, Class<T7> t7) {
@@ -496,8 +513,9 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 8つのテーブルをJoinした結果をListで返却する。
+	 * @see {@link #getList(QueryBuilder, Class, Class) getList(QueryBuilder, Class, Class)}
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto,T4 extends IDto,T5 extends IDto,T6 extends IDto,T7 extends IDto,T8 extends IDto>
 	List<EightJoinned<T1,T2,T3,T4,T5,T6,T7,T8>> getList(QueryBuilder qw, Class<T1> t1, Class<T2> t2, Class<T3> t3, Class<T4> t4, Class<T5> t5, Class<T6> t6, Class<T7> t7, Class<T8> t8) {
@@ -505,7 +523,7 @@ public class DBManager {
 		return execQuery(qw, handler);
 	}
 
-	public <T extends IDto> List<T> execQuery(QueryBuilder qw, DtoListHandler<T> handler) {
+	protected <T extends IDto> List<T> execQuery(QueryBuilder qw, DtoListHandler<T> handler) {
 		String sql = qw.buildQuery();
 		return execQuery(handler, sql, qw.getQueryPrms());
 	}
@@ -513,8 +531,31 @@ public class DBManager {
 
 
 	/**
-	 * 検索処理。
-	 * 結果を返却せず、一件毎にコールバックハンドラを呼び出す。
+	 * QueryBuilderを使用した検索処理.<br/>
+	 * 但し結果は返却せず、一件毎にコールバックハンドラを呼び出す。
+	 *
+	 * <pre>
+	 * manager
+	 *     .setFetchSize(10)
+	 *     .fetchDto(
+	 *         builder
+	 *             .select()
+	 *             .from(TBL1),
+	 *         new DtoFetchHandler{@code<Tbl1>}(Tbl1.class) {
+	 *             {@code @Override}
+	 *             protected void start() {
+	 *                 // ResultSetが空でも呼ばれる。
+	 *             }
+	 *             {@code @Override}
+	 *             protected void exec(Tbl1 dto) {
+	 *                 // ResultSet一件毎に呼ばれる。
+	 *             }
+	 *             {@code @Override}
+	 *             protected void finish() {
+	 *                 // ResultSetが空でも呼ばれる。
+	 *             }
+	 *         });
+	 * </pre>
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void fetchDto(QueryBuilder qw, DtoFetchHandler<? extends IDto> handler) {
@@ -534,7 +575,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 結果が一件しか無い場合に、ListではなくDto単体で返却する。
 	 * 結果が一件以上ある場合にはExceptionをスローする。
 	 */
@@ -544,7 +585,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 2つのテーブルをJoinした単一結果をDtoで返却する。
 	 */
 	public <T1 extends IDto,T2 extends IDto>
@@ -554,7 +595,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 3つのテーブルをJoinした単一結果をDtoで返却する。
 	 */
 	public <T1 extends IDto,T2 extends IDto,T3 extends IDto>
@@ -566,7 +607,9 @@ public class DBManager {
 
 	/**
 	 * シーケンスから値を取得する。現在値ではなく、新規の値。
+	 * @Deprecated QueryBuilderを内部的に生成するのはNG
 	 */
+	@Deprecated
 	public Number getSequenceVal(String seqName) {
 		String sql = QueryBuilder.get(dbms).getGetSequenceValSql(seqName);
 //		switch(dbms) {
@@ -581,9 +624,20 @@ public class DBManager {
 	}
 
 	/**
-	 * オートインクリメントされた値を取得する。
-	 * 通常はこのメソッドを外部から直接利用する事は想定されない。
+	 * シーケンスから値を取得する.<br/>
+	 * 現在値ではなく、新規の値。
 	 */
+	public Number getSequenceVal(QueryBuilder qb, String seqName) {
+		String sql = qb.getGetSequenceValSql(seqName);
+		return (Number) execQuery(new ScalarHandler(1), sql);
+	}
+
+	/**
+	 * オートインクリメントされた値を取得する.<br/>
+	 * 通常はこのメソッドを外部から直接利用する事は想定されない。
+	 * @Deprecated QueryBuilderを内部的に生成するのはNG
+	 */
+	@Deprecated
 	public Number getAutoIncrementedVal() {
 		String sql = QueryBuilder.get(dbms).getGetAutoIncrementedValSql();
 		return (Number) execQuery(new ScalarHandler(1), sql);
@@ -591,29 +645,39 @@ public class DBManager {
 
 
 	/**
-	 * 検索処理。
-	 * 検索結果の先頭行の先頭カラムの値をNumber型で取得する。
-	 * 当然ながら先頭行の先頭カラムの値が数値でない場合はExceptionになる。
+	 * QueryBuilderを使用した検索処理.<br/>
+	 * 検索結果の先頭行の先頭カラムの値をNumber型で取得する。<br/>
+	 * <p>
+	 * 先頭カラムの値が数値でない場合はException。<br/>
+	 * また実際の型は、JDBCによって、またSQL内で使用した関数等により異なる。
 	 *
-	 * Number型なのは、使用する関数により、またDBMSのJDBCドライバにより、型が不明なため（Int/Longあるいはその他）。
-	 *
+	 * <pre>
+	 * {@code
+	 * int cnt =
+	 *     manager.getNum(
+	 *         builder
+	 *             .select(count())
+	 *             .from(TBL1)).intValue();
+	 * }
+	 * </pre>
 	 */
 	public Number getNum(QueryBuilder qw) {
 		return (Number) execQuery(qw, new ScalarHandler(1));
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 検索結果の先頭行の先頭カラムの値を取得する。
-	 *
+	 * @Deprecated 重複メソッド
 	 */
+	@Deprecated
 	public <T> T getColValue(QueryBuilder qw, Class<T> clazz) {
 		return getColValue(qw, 1, clazz);
 	}
 
 	/**
-	 * 検索処理。
-	 * 検索結果の先頭行の、任意のカラムの値を取得する。
+	 * QueryBuilderを使用した検索処理.<br/>
+	 * 検索結果の先頭行の、任意のカラムの値を、任意の型にキャストして取得する。
 	 *
 	 * @param colNum 1 based index.
 	 */
@@ -624,7 +688,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 検索結果の先頭行を、カラム名をキーにしたMapで取得する。
 	 *
 	 * @see org.apache.commons.dbutils.handlers.MapHandler.MapHandler()
@@ -634,7 +698,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 検索結果を、カラム名をキーにしたMapのListで取得する。
 	 *
 	 * @see org.apache.commons.dbutils.handlers.MapListHandler.MapListHandler()
@@ -644,7 +708,7 @@ public class DBManager {
 	}
 
 	/**
-	 * 検索処理。
+	 * QueryBuilderを使用した検索処理.<br/>
 	 * 検索結果を、任意の型で取得する。
 	 *
 	 * @see org.apache.commons.dbutils.ResultSetHandler<T>
@@ -655,25 +719,31 @@ public class DBManager {
 
 
 	/**
-	 * 検索処理。
-	 * 検索結果を、任意の型で取得する。
+	 * 検索処理.<br/>
+	 *
+	 * @param handler
+	 * @param sql
+	 * @param params
+	 * @return
 	 *
 	 * @see org.apache.commons.dbutils.ResultSetHandler<T>
 	 */
 	public <T> T execQuery(ResultSetHandler<T> handler, String sql, Object...params) {
+
+		// コンパイルを通ってしまうのでチェック
 		if (params != null && params.length != 0 && params[0] instanceof Collection<?>)
 			throw new RuntimeException("Params are collection! Please extract to Object[]");
+
 //		return execQuery(new ReadOnlyQueryRunner(dbms, fetchSize, queryRunnerPmdKnownBroken), handler, sql, params);
 		return execQuery(newQueryRunner(), handler, sql, params);
 	}
 
 
 	/**
-	 * 検索処理。
-	 * 検索結果を、任意の型で取得する。
-	 * 取得後、postProcess設定に応じて処置を行う。
-	 *
-	 * @see org.apache.commons.dbutils.ResultSetHandler<T>
+	 * 検索処理.<br/>
+	 * <li>DBUtilsのAPIを使用して、取得処理を行う。
+	 * <li>postProcess設定に応じて、コミットやコネクションクローズ等の処置を行う（あるいは行わない）。
+	 * <li>Exception時に、postProcessOnException設定に応じて、コネクションクローズ等の処置を行う（あるいは行わない）。
 	 */
 	public <T> T execQuery(QueryRunner qr, ResultSetHandler<T> handler, String sql, Object...params) {
 		try {
@@ -702,15 +772,22 @@ public class DBManager {
 
 
 	/**
-	 * 永続化機能.<br/>
+	 * IPersistableなDTOを使用した永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルから一件のレコードを取得する。
+	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = Tbl1.createWithKey(id);
+	 * tbl1 = manager.selectWithKey(tbl1);
+	 * }
+	 * </pre>
 	 */
 	public <T extends IPersistable> T selectWithKey(T dto) {
 		return selectWithKey(dto, false);
 	}
 
 	/**
-	 * 永続化機能.<br/>
+	 * IPersistableなDTOを使用した永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルから一件のレコードを取得する。
 	 * 同時に取得されたレコードに対する行ロックを取得する。
 	 */
@@ -719,27 +796,56 @@ public class DBManager {
 	}
 
 	/**
-	 * 永続化機能.<br/>
+	 * IPersistableなDTOを使用した永続化機能.<br/>
 	 * 引数のDTOを元に、テーブルにレコードをInsertする。
+	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = new Tbl1();
+	 * tbl1.col1 = "aa";
+	 * tbl1.col2 = 999;
+	 * tbl1 = manager.insert(tbl1);
+	 * }
+	 * </pre>
 	 */
 	public <T extends IPersistable> T insert(T dto) {
 		return newInsertHandler(this).exec(dto);
 	}
 
 	/**
-	 * 永続化機能.<br/>
+	 * IPersistableなDTOを使用した永続化機能.<br/>
 	 * 引数のDTOを元に、テーブルにレコードをupdateする。
+	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = Tbl1.createWithKey(id);
+	 * tbl1 = manager.selectWithKey(tbl1);
+	 * tbl1.col1 = "newvalue";
+	 * tbl1 = manager.update(tbl1);
+	 * }
+	 * </pre>
 	 */
 	public <T extends IPersistable> T update(T dto) {
 		return newUpdateHandler(this).exec(dto);
 	}
 
 	/**
-	 * 永続化機能.<br/>
-	 * 引数のDTOを元に、テーブルにレコードをupdateする。
-	 * 対象テーブルがIOptimisticLockingの場合に、
-	 * 更新結果が0件だった時にはExceptionをスローする（＝他者から先に更新されたものとみなす）。
+	 * IPersistableなDTOを使用した永続化機能.<br/>
+	 * 引数のDTOを元に、テーブルにレコードをupdateする。<br/>
+	 * 更新結果が0件だった時にはOptimisticLockingException（＝他者から先に更新されたものとみなす）。
 	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = Tbl1.createWithKey(id);
+	 * tbl1 = manager.selectWithKey(tbl1);
+	 * tbl1.col1 = "newvalue";
+	 * try {
+	 *     tbl1 = manager.update(tbl1);
+	 * } catch (OptimisticLockingException e) {
+	 *     // record has updated by another one.
+	 * }
+	 * }
+	 * </pre>
 	 */
 	public <T extends IOptimisticLocking> T update(T dto) throws OptimisticLockingException {
 		T ret = newUpdateHandler(this).exec(dto);
@@ -750,18 +856,35 @@ public class DBManager {
 	}
 
 	/**
-	 * 永続化機能.<br/>
+	 * IPersistableなDTOを使用した永続化機能.<br/>
 	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルにレコードをdeleteする。
+	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = Tbl1.createWithKey(id);
+	 * int ret = manager.delete(tbl1);
+	 * }
+	 * </pre>
 	 */
 	public <T extends IPersistable> int delete(T dto) {
 		return deleteInner(dto);
 	}
 
 	/**
-	 * 永続化機能.<br/>
-	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルにレコードをdeleteする。
-	 * 対象テーブルがIOptimisticLockingの場合に、
-	 * 更新結果が0件だった時にはExceptionをスローする（＝他者から先に更新されたものとみなす）。
+	 * IPersistableなDTOを使用した永続化機能.<br/>
+	 * 引数のDTOの主キーフィールドに設定されている値を元に、テーブルにレコードをdeleteする。<br/>
+	 * 更新結果が0件だった時にはOptimisticLockingException（＝他者から先に更新されたものとみなす）。
+	 *
+	 * <pre>
+	 * {@code
+	 * Tbl1 tbl1 = Tbl1.createWithKey(id);
+	 * try {
+	 *     manager.delete(tbl1);
+	 * } catch (OptimisticLockingException e) {
+	 *     // record has updated by another one.
+	 * }
+	 * }
+	 * </pre>
 	 */
 	public <T extends IOptimisticLocking> int delete(T dto)
 	throws OptimisticLockingException {
@@ -785,20 +908,24 @@ public class DBManager {
 	// Update-query functions (with no-persistor)
 
 	/**
-	 * 更新処理。
-	 * 処理後、postProcess設定に応じて処置を行う。
+	 * UpdateQueryBuilderを使用した更新処理.<br/>
 	 *
-	 * @see org.apache.commons.dbutils.ResultSetHandler<T>
+	 * <pre>
+	 * {@code
+	 * int ret = manager.execUpdate(
+	 *     new UpdateQueryBuilder()
+	 *         .update(TBL1)
+	 *         .set(TBL1.COL2, true)
+	 *         .where(equal(TBL1.COL3, "value")));
+	 * }
+	 * </pre>
 	 */
 	public int execUpdate(UpdateQueryBuilder updator) {
 		return execUpdate(updator.createSql(/*dbms*/), updator.getUpdatePrms());
 	}
 
 	/**
-	 * 更新処理。
-	 * 処理後、postProcess設定に応じて処置を行う。
-	 *
-	 * @see org.apache.commons.dbutils.ResultSetHandler<T>
+	 * 更新処理.<br/>
 	 */
 	public int execUpdate(String query, Object...params) {
 		try {
