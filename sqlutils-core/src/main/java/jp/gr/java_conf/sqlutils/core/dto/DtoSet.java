@@ -5,6 +5,44 @@ import java.util.HashMap;
 import jp.gr.java_conf.sqlutils.core.exception.DtoSetClassDuplicationException;
 import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 
+/**
+ * 実体は、キーにクラスタイプ名を、バリューにそのクラスのインスタンスを取るHashMap.<br/>
+ * <pre>
+ * List<JoinnedDto<Tbl1, Tbl2>> list =
+ *     manager.getList(
+ *         builder
+ *             .selectAll()
+ *             .from(TBL1)
+ *             .innerJoin(TBL2, equal(TBL1.COL2, TBL2.COL1))
+ *         ,Tbl1.class, Tbl2.class);
+ *
+ * Tbl1 t1 = list.get(0).get(Tbl1.class);
+ * Tbl2 t2 = list.get(0).get(Tbl2.class);
+ * </pre>
+ *
+ * <p>
+ * 同一クラスのインスタンスを複数格納する事はできない。<br/>
+ * 自己結合等を行う場合は、SQL上でも別名定義が必要になるので、その別名に併せて、DTOを継承した別のクラスを用意する。
+ * <pre>
+ * public static class Tbl1Alias extends Tbl1 {
+ *     private static final long serialVersionUID = 1L;
+ *     {@code @Override}
+ *     public String getTableName() {
+ *         return "TBL1_ALIAS";
+ *     }
+ * }
+ *
+ * List<JoinnedDto<Tbl1, Tbl1Alias>> list =
+ *     manager.getList(
+ *         builder
+ *             .selectAll()
+ *             .from(TBL1)
+ *             .innerJoin(
+ *                 as(TBL1, "TBL1_ALIAS"),
+ *                 equal(TBL1.COL2, tblalias("TBL1_ALIAS", TBL1.COL1)))
+ *         ,Tbl1.class, Tbl1Alias.class);
+ * </pre>
+ */
 public class DtoSet extends HashMap<String, IDto> implements IDto {
 
 	private static final long serialVersionUID = 1L;

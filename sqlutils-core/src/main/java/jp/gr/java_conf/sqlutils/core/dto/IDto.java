@@ -40,7 +40,7 @@ public interface IDto extends Serializable {
 	 * <pre>
 	 * public static class Master1Alias extends Master1 {
 	 *     private static final long serialVersionUID = 1L;
-	 *     @Override
+	 *     {@code @Override}
 	 *     public String getTableName() {
 	 *         return "M1_ALIAS";
 	 *     }
@@ -57,7 +57,7 @@ public interface IDto extends Serializable {
 
 
 	/**
-	 * FWによって自動生成されたDTO
+	 * ジェネレータによって自動生成されたDTOである事を示す。
 	 */
 	public interface IGeneratedDto extends IDto, Cloneable {
 		ITable getTableDefinition();
@@ -73,19 +73,15 @@ public interface IDto extends Serializable {
 	}
 
 	/**
-	 * FWの楽観排他機能が有効になっている事を示すマーカーIF<br>
+	 * 楽観排他ロックキーとしてマークされているカラムを持つDTOである事を示すマーカーIF<br>
 	 */
 	public interface IOptimisticLocking extends IPersistable {
 	}
 
 	/**
-	 * FWの論理削除機能が有効になっている事を示すマーカーIF<br>
+	 * 論理削除フラグとしてマークされているカラムを持つDTOである事を示すマーカーIF<br>
 	 */
 	public interface ILogicalDeleting extends IPersistable {
 	}
 
-//	public interface IDtoField {
-//		String name();
-//		String fullname();
-//	}
 }

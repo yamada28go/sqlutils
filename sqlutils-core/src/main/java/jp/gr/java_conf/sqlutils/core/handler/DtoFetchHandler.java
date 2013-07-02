@@ -2,16 +2,48 @@ package jp.gr.java_conf.sqlutils.core.handler;
 
 import jp.gr.java_conf.sqlutils.core.dto.IDto;
 
-/*
- * DtoListHandlerは、全ての対象データをメモリ上に確保するので、
- * 大量データの処理を行う場合は このハンドラを使い、exec() メソッド内で一件ずつ順次処理を行う。
- * 使用例としては主に
- * ・DBから大量データを取得してCSVファイルに出力：一件ずつFetchして、ファイルに書き込んでゆく
+/**
  *
+ * QueryBuilderを使用した検索処理に使用するハンドラ.<br/>
+ * 検索結果一件毎にコールバックハンドラとして呼び出される。
+ *
+ * <pre>
+ * manager
+ *     .setFetchSize(10)
+ *     .fetchDto(
+ *         builder
+ *             .select()
+ *             .from(TBL1),
+ *         new DtoFetchHandler{@code<Tbl1>}(Tbl1.class) {
+ *             {@code @Override}
+ *             protected void start() {
+ *             }
+ *             {@code @Override}
+ *             protected void exec(Tbl1 dto) {
+ *             }
+ *             {@code @Override}
+ *             protected void finish() {
+ *             }
+ *         });
+ * </pre>
  */
 public abstract class DtoFetchHandler<T extends IDto> {
+
+	/**
+	 * コールバックの最初に一度だけ呼ばれる処理.<br/>
+	 * 結果が0件でも呼ばれる。
+	 */
 	abstract protected void start();
+
+	/**
+	 * 結果一件毎に呼ばれる処理.<br/>
+	 */
 	abstract protected void exec(T dto);
+
+	/**
+	 * コールバックの最後に一度だけ呼ばれる処理.<br/>
+	 * 結果が0件でも呼ばれる。
+	 */
 	abstract protected void finish();
 
 
@@ -43,7 +75,7 @@ public abstract class DtoFetchHandler<T extends IDto> {
 	}
 
 
-	public Class<? extends IDto>[] getClasses() {
+	Class<? extends IDto>[] getClasses() {
 		return classes;
 	}
 }

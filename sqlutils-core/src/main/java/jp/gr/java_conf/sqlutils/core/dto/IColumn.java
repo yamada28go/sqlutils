@@ -7,6 +7,10 @@ import jp.gr.java_conf.sqlutils.core.builder.BuilderElement.IOrderColumn;
 import jp.gr.java_conf.sqlutils.core.builder.BuilderElement.ISelectColumn;
 import jp.gr.java_conf.sqlutils.core.builder.ConditionBuilder.IConditionColumn;
 
+
+/**
+ * ジェネレータにより自動生成されるテーブル定義のカラム定義クラスのInterface
+ */
 public interface IColumn<T> extends ISelectColumn<T>, IOrderColumn, IConditionColumn<T>, IGroupByColumn {
 	ITable getTable();
 	Class<T> getDataType();
@@ -26,6 +30,9 @@ public interface IColumn<T> extends ISelectColumn<T>, IOrderColumn, IConditionCo
 	String fieldname();
 	int getSize();
 
+	/**
+	 * ジェネレータにより自動生成されるテーブル定義のカラム定義クラス
+	 */
 	public static class Column<T> implements IColumn<T>, Serializable {
 		private static final long serialVersionUID = 1L;
 		String name;

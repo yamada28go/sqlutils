@@ -6,6 +6,9 @@ import jp.gr.java_conf.sqlutils.core.builder.BuilderElement.ITblElement;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IGeneratedDto;
 
 
+/**
+ * ジェネレータにより自動生成されるテーブル定義クラスのInterface
+ */
 public interface ITable extends ITblElement {
 	String getSchemaName();
 	IColumn<?>[] getCols();
@@ -17,6 +20,9 @@ public interface ITable extends ITblElement {
 	Class<? extends IGeneratedDto> getDtoClass();
 
 
+	/**
+	 * ジェネレータにより自動生成されるテーブル定義クラスのベースクラス
+	 */
 	public static abstract class Table implements ITable, Serializable {
 		private static final long serialVersionUID = 1L;
 		String name;

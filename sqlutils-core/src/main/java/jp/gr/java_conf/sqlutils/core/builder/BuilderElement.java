@@ -7,10 +7,13 @@ import jp.gr.java_conf.sqlutils.core.dto.ITable;
 
 public class BuilderElement {
 
+	/**
+	 * {@link QueryBuilder#from(ITblElement)}に指定できるテーブル定義型である事を示す。
+	 */
 	public interface ITblElement {
 	}
 
-	public static class TblElement implements ITblElement {
+	static class TblElement implements ITblElement {
 		ITable tbl;
 		String alias;
 		TblElement(ITable tbl) {
@@ -59,27 +62,36 @@ public class BuilderElement {
 
 
 
-	public interface ISelectable {
+	interface ISelectable {
 	}
 
+	/**
+	 * {@link QueryBuilder#select(ISelectable...)}に指定できるカラム定義型である事を示す。
+	 */
 	public interface ISelectColumn<T> extends ISelectable {
 		String fullname(boolean appendSchema);
 	}
 
+	/**
+	 * {@link QueryBuilder#orderBy(IOrderElement...)}に指定できるカラム定義型である事を示す。
+	 */
 	public interface IOrderColumn {
 		String fullname(boolean appendSchema);
 	}
 
+	/**
+	 * {@link QueryBuilder#groupBy(IGroupByColumn...)}に指定できるカラム定義型である事を示す。
+	 */
 	public interface IGroupByColumn {
 		String fullname(boolean appendSchema);
 	}
 
-	public interface IAliasSelectable {
+	interface IAliasSelectable {
 		String fullname(boolean appendSchema);
 		String alias();
 	}
 
-	public static class ColElement<T> implements ISelectColumn<T>, IConditionColumn<T>, IOrderColumn, IGroupByColumn, IAliasSelectable {
+	static class ColElement<T> implements ISelectColumn<T>, IConditionColumn<T>, IOrderColumn, IGroupByColumn, IAliasSelectable {
 		String tblAlias;
 		IColumn<T> col;
 		String alias;
@@ -107,7 +119,7 @@ public class BuilderElement {
 		}
 	}
 
-	public static class SelectFunc implements ISelectable, IAliasSelectable {
+	static class SelectFunc implements ISelectable, IAliasSelectable {
 		String expression;
 		ISelectColumn<?> col;
 		String alias;
@@ -128,11 +140,11 @@ public class BuilderElement {
 		}
 	}
 
-	public interface IOrderElement {
+	interface IOrderElement {
 		public String toQuery(boolean appendSchema);
 	}
 
-	public static class OrderElement implements IOrderElement {
+	static class OrderElement implements IOrderElement {
 		private IOrderColumn col;
 		private boolean isAsc;
 		OrderElement(IOrderColumn col, boolean isAsc) {
@@ -144,7 +156,7 @@ public class BuilderElement {
 		}
 	}
 
-	public static class RawOrderElement implements IOrderElement {
+	static class RawOrderElement implements IOrderElement {
 		private String name;
 		private boolean isAsc;
 		RawOrderElement(String name, boolean isAsc) {

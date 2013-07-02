@@ -6,6 +6,12 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * ResultSetの各要素が、どのテーブル・カラムから取得された値かを判定するパーサー.<br/>
+ * ResultSetのメタデータにその値が格納されている場合もあるが、JDBC次第（Oracle等はnullになってる）なので、
+ * 独自に用意。
+ *
+ */
 public class ResultSetParser {
 
 	@SuppressWarnings("unused")
@@ -21,10 +27,20 @@ public class ResultSetParser {
 
 	private String[] aliasNames;
 
+	/**
+	 * コンストラクタ
+	 */
 	public ResultSetParser(String[] aliasNames) {
 		this.aliasNames = aliasNames;
 	}
 
+	/**
+	 * ResultSetのn番目の要素が、どのテーブル・カラムから取得された値かを判断する。
+	 * @param rs
+	 * @param num
+	 * @return
+	 * @throws SQLException
+	 */
 	public ParseResult parse(ResultSet rs, int num) throws SQLException {
 
 		ParseResult ret = new ParseResult();

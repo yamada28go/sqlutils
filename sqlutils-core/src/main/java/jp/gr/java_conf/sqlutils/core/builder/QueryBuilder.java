@@ -25,12 +25,14 @@ import jp.gr.java_conf.sqlutils.core.handler.ResultSetParser;
 
 /**
  * インスタンスメソッドとスタティックメソッドを使って、Selectクエリーを構築する.<br/>
+ * インスタンスの再利用は想定されていない。<br/>
  * DBMSによる構文の相違などは、このクラスを継承した個別クラスを用意する事で解消する。
  * <p>
  * スタティックメソッドの使用の際は、スタティックインポートを使用する事で、コードの短略化が図れる。
  * <pre>
  * import static jp.gr.java_conf.sqlutils.core.builder.QueryBuilder.*;
  * </pre>
+ * @see jp.gr.java_conf.sqlutils.core.builder.ConditionBuilder
  */
 public class QueryBuilder extends ConditionBuilder {
 
@@ -385,7 +387,7 @@ public class QueryBuilder extends ConditionBuilder {
 	 *
 	 * <p>
 	 * builder.select(count()).from(TBL1)
-	 * 
+	 *
 	 * @Deprecated 冗長メソッドにつき削除予定
 	 */
 	@Deprecated
@@ -402,22 +404,84 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 
+	/**
+	 * FROM句を構築する.<br/>
+	 * 一度しか呼びだす事はできない。
+	 *
+	 * <p>
+	 * builder.selectAll().from(TBL1)
+	 *
+	 */
 	public QueryBuilder from(ITblElement fromTbl) {
 		throwIf(this.from != null, "From statement is already setted.");
 		this.from = TblElement.create(fromTbl);
 		return this;
 	}
 
+	/**
+	 * JOIN句(inner join)を構築する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .innerJoin(TBL2, equal(TBL1.COL1, TBL2.COL2))
+	 * </pre>
+	 */
 	public QueryBuilder innerJoin(ITblElement tbl, IConditionElement on) {
 		joins.add(new JoinedTbl(JoinType.INNER, TblElement.create(tbl), on));
 		return this;
 	}
 
+	/**
+	 * JOIN句(left outer join)を構築する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .leftOuterJoin(TBL2, equal(TBL1.COL1, TBL2.COL2))
+	 * </pre>
+	 *
+	 */
 	public QueryBuilder leftOuterJoin(ITblElement tbl, IConditionElement on) {
 		joins.add(new JoinedTbl(JoinType.LEFT_OUTER, TblElement.create(tbl), on));
 		return this;
 	}
 
+	/**
+	 * WHERE句を構築する.<br/>
+	 * #and() や #or() を使用して、条件を入れ子にする事も可能。
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(equal(TBL1.COL1, value))
+	 *
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(
+	 *         and(
+	 *             equal(TBL1.COL1, val1),
+	 *             equal(TBL1.COL2, val2),
+	 *             or(
+	 *                 equal(TBL1.COL3, "a"),
+	 *                 equal(TBL1.COL3, "A")
+	 *             )
+	 *         ))
+	 * </pre>
+	 *
+	 * 複数回呼び出した場合、トップレベルにand条件で追加される。
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(equal(TBL1.COL1, val1))
+	 *     .where(equal(TBL1.COL2, val2))
+	 * </pre>
+	 */
 	public QueryBuilder where(IConditionElement condition) {
 //		throwIf(this.rootWhere != null, "Where-condition is already setted.");
 //		rootWhere = condition;
@@ -442,13 +506,41 @@ public class QueryBuilder extends ConditionBuilder {
 		}
 	}
 
+	/**
+	 * GROUP BY句を構築する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .select(
+	 *         TBL1.COL1,
+	 *         as(sum(TBL1.COL2), "COL2_SUM")
+	 *     )
+	 *     .from(TBL1)
+	 *     .groupBy(TBL1.COL1)
+	 * </pre>
+	 *
+	 */
 	public QueryBuilder groupBy(IGroupByColumn...groupables) {
 		throwIf(this.groupables != null, "Group-by statement is already setted.");
 		this.groupables = groupables;
 		return this;
 	}
 
-// HAVING句の中身は、規定するのが困難なので、自由入力を前提とする
+	/**
+	 * HAVING句を構築する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .select(
+	 *         TBL1.COL1,
+	 *         as(sum(TBL1.COL2), "COL2_SUM")
+	 *     )
+	 *     .from(TBL1)
+	 *     .groupBy(TBL1.COL1)
+	 *     .having("COL2_SUM > 0")
+	 * </pre>
+	 *
+	 */
 	public QueryBuilder having(String condition) {
 		throwIf(this.offset != null, "Offset statement is already setted.");
 		if (this.having != null) throw new RuntimeException("Having statement is already setted.");
@@ -456,24 +548,67 @@ public class QueryBuilder extends ConditionBuilder {
 		return this;
 	}
 
+	/**
+	 * ORDER BY句を構築する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .orderBy(asc(TBL1.COL1), desc(TBL1.COL2))
+	 * </pre>
+	 */
 	public QueryBuilder orderBy(IOrderElement...orderables) {
 		throwIf(this.orderables != null, "Order-by statement is already setted.");
 		this.orderables = orderables;
 		return this;
 	}
 
+	/**
+	 * LIMIT句を付加する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .limit(20)
+	 *     .offset(0)
+	 * </pre>
+	 */
 	public QueryBuilder limit(int limit) {
 		throwIf(this.limit != null, "Limit statement is already setted.");
 		this.limit = limit;
 		return this;
 	}
 
+	/**
+	 * OFFSET句を付加する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .limit(20)
+	 *     .offset(0)
+	 * </pre>
+	 */
 	public QueryBuilder offset(int offset) {
 		throwIf(this.offset != null, "Offset statement is already setted.");
 		this.offset = offset;
 		return this;
 	}
 
+	/**
+	 * FORUPDATE句を付加する.<br/>
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(....)
+	 *     .forUpdate()
+	 * </pre>
+	 */
 	public QueryBuilder forUpdate() {
 		this.forUpdate = true;
 		return this;
@@ -485,6 +620,19 @@ public class QueryBuilder extends ConditionBuilder {
 	}
 
 
+	/**
+	 * 論理削除済みカラムを抽出対象とする.<br/>
+	 * このメソッドを呼ばない限り、QueryBuilderを介した取得処理においては、論理削除済みのレコードは抽出されない。<br/>
+	 * ※SQL構築時に、論理削除済みレコードを除外する構文が自動的に付加される。
+	 *
+	 * <pre>
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(....)
+	 *     .containLogicalDeletedRecords()
+	 * </pre>
+	 */
 	public QueryBuilder containLogicalDeletedRecords() {
 		containLogicalDeletedRecords = true;
 		return this;
@@ -502,10 +650,32 @@ public class QueryBuilder extends ConditionBuilder {
 		return false;
 	}
 
+	/**
+	 * WHERE句の条件構造のみを取り出す.<br/>
+	 * 一般的に一覧画面を作成する際など、同一条件で2度のDBアクセス（件数取得とデータ取得）が発生するため、
+	 * 条件生成処理だけを共通化する目的に使用。
+	 *
+	 * <pre>
+	 * private IConditionElement getCommonWhere() {
+	 *     return builder
+	 *             .where(......)
+	 *             .getWhere();
+	 * }
+	 *
+	 * builder
+	 *     .selectAll()
+	 *     .from(TBL1)
+	 *     .where(getCommonWhere())
+	 * </pre>
+	 */
 	public IConditionElement getWhere() {
 		return rootWhere;
 	}
 
+	/**
+	 * クエリー（PreparedStatement）にバインドする値を取り出す.<br/>
+	 * 通常このメソッドをユーザが呼び出す事は想定されて無い。
+	 */
 	public Object[] getQueryPrms() {
 		if (rootWhere == null)
 			return null;
@@ -513,7 +683,10 @@ public class QueryBuilder extends ConditionBuilder {
 			return rootWhere.getArgs();
 	}
 
-
+	/**
+	 * クエリー文字列を生成する.<br/>
+	 * 通常このメソッドをユーザが呼び出す事は想定されて無い。
+	 */
 	public String buildQuery(/*DBMS dbms*/) {
 
 		if (selectables.size() == 0) throw new RuntimeException();
@@ -694,15 +867,25 @@ public class QueryBuilder extends ConditionBuilder {
 
 
 
+	/**
+	 * シーケンスから値を採番するためのSQLを返却する。
+	 */
 	public String getGetSequenceValSql(String seqName) {
 		return "select nextval('" + seqName + "')";
 	}
 
-
+	/**
+	 * オートインクリメント型で新規採番された値を取得するためのSQLを返却する。
+	 */
 	public String getGetAutoIncrementedValSql() {
 		throw new RuntimeException("Not supported!");
 	}
 
+	/**
+	 * パーサーを返却する。
+	 * @return ResultSetの各要素が、どのテーブル・カラムから取得された値かを判定するパーサー
+	 * @see jp.gr.java_conf.sqlutils.core.handler.ResultSetParser
+	 */
 	public ResultSetParser getResultSetParser() {
 		return new ResultSetParser(getQueryGetColNames());
 	}
