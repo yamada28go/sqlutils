@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+
 import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.DBManager.PostProcess;
+import jp.gr.java_conf.sqlutils.core.builder.QueryBuilder;
 import jp.gr.java_conf.sqlutils.core.dto.IColumn;
 import jp.gr.java_conf.sqlutils.core.dto.ITable;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
@@ -31,6 +34,9 @@ public class InsertHandler extends PersistorHandler {
 		// for override
 	}
 
+	protected QueryBuilder newQueryBuilder(String dbms) {
+		return QueryBuilder.get(dbms);
+	}
 
 	public <T extends IPersistable> T exec(T dto) {
 
@@ -71,7 +77,9 @@ public class InsertHandler extends PersistorHandler {
 
 				// シーケンスカラムの自動補完
 				if (c.getSequenceTableName() != null) {
-					Object nextVal = manager.getSequenceVal(c.getSequenceTableName());
+//					Object nextVal = manager.getSequenceVal(c.getSequenceTableName());
+					String t = newQueryBuilder(manager.dbms).getGetSequenceValSql(c.getSequenceTableName());
+					Object nextVal = manager.execQuery(new ScalarHandler(1), t);
 					attrs.put(c.name(), nextVal);
 					clone.set(c.name(), nextVal);
 					continue;
@@ -99,7 +107,10 @@ public class InsertHandler extends PersistorHandler {
 			try {
 				// AutoIncrements型カラムに、自動設定された値を取得
 				if (autoIncrementCol != null) {
-					clone.set(autoIncrementCol.name(), manager.getAutoIncrementedVal());
+//					clone.set(autoIncrementCol.name(), manager.getAutoIncrementedVal());
+					String t = newQueryBuilder(manager.dbms).getGetAutoIncrementedValSql();
+					Object nextVal = manager.execQuery(new ScalarHandler(1), t);
+					clone.set(autoIncrementCol.name(), nextVal);
 				}
 				clone = manager.selectWithKey(clone);
 
