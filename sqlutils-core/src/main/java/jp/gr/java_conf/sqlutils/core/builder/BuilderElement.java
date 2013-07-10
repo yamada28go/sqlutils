@@ -86,12 +86,20 @@ public class BuilderElement {
 		String fullname(boolean appendSchema);
 	}
 
+	/**
+	 * {@link QueryBuilder#orderBy(IOrderElement...)}に指定できるカラム定義型である事を示す。
+	 */
+	public interface IOrderElement {
+		public String toQuery(boolean appendSchema);
+	}
+
 	interface IAliasSelectable {
 		String fullname(boolean appendSchema);
 		String alias();
 	}
 
-	static class ColElement<T> implements ISelectColumn<T>, IConditionColumn<T>, IOrderColumn, IGroupByColumn, IAliasSelectable {
+	static class ColElement<T>
+	implements ISelectColumn<T>, IConditionColumn<T>, IOrderColumn, IGroupByColumn, IAliasSelectable {
 		String tblAlias;
 		IColumn<T> col;
 		String alias;
@@ -138,10 +146,6 @@ public class BuilderElement {
 		public String alias() {
 			return alias;
 		}
-	}
-
-	interface IOrderElement {
-		public String toQuery(boolean appendSchema);
 	}
 
 	static class OrderElement implements IOrderElement {
