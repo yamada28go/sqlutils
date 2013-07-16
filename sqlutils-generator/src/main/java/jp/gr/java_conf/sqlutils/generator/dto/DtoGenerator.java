@@ -137,13 +137,13 @@ public class DtoGenerator {
 					}
 
 					// list views
-					ResultSet rs = PLUGIN.getViews(dbmd, SCHEMA);
-					while(rs.next()) {
+					ResultSet rsViews = PLUGIN.getViews(dbmd, SCHEMA);
+					while(rsViews.next()) {
 						// table
-						String name = rs.getString("TABLE_NAME");
+						String name = rsViews.getString("TABLE_NAME");
 						logger.debug("==========================");
 						logger.debug(" " + name);
-						TableInfo table = PLUGIN.createTable(rsTbls, dbmd, true);
+						TableInfo table = PLUGIN.createTable(rsViews, dbmd, true);
 						tables.add(table);
 						// cols
 						final List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
