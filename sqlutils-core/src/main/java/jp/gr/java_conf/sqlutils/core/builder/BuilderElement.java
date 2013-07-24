@@ -62,7 +62,10 @@ public class BuilderElement {
 
 
 
-	interface ISelectable {
+	/**
+	 * {@link QueryBuilder#select(ISelectable...)}に指定できるカラム定義型である事を示す。
+	 */
+	public interface ISelectable {
 	}
 
 	/**
@@ -93,7 +96,10 @@ public class BuilderElement {
 		public String toQuery(boolean appendSchema);
 	}
 
-	interface IAliasSelectable {
+	/**
+	 * 別名定義可能なカラム定義型である事を示す。
+	 */
+	public interface IAliasSelectable {
 		String fullname(boolean appendSchema);
 		String alias();
 	}
