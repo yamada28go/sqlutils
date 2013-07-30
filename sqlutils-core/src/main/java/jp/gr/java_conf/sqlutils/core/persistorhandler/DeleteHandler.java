@@ -10,6 +10,11 @@ import jp.gr.java_conf.sqlutils.core.dto.ITable;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
 import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 
+
+/**
+ * DTOインスタンスからDelete文を生成・実行するハンドラ
+ *
+ */
 public class DeleteHandler extends AbstractUpdateHandler {
 
 

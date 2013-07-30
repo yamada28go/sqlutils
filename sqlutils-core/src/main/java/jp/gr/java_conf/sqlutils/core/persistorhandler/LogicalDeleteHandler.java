@@ -8,10 +8,15 @@ import java.util.Map;
 
 import jp.gr.java_conf.sqlutils.DBManager;
 import jp.gr.java_conf.sqlutils.core.dto.IColumn;
+import jp.gr.java_conf.sqlutils.core.dto.IDto.ILogicalDeleting;
 import jp.gr.java_conf.sqlutils.core.dto.ITable;
-import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
 import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 
+
+/**
+ * DTOインスタンスからUpdate文（論理削除）を生成・実行するハンドラ
+ *
+ */
 public class LogicalDeleteHandler extends AbstractUpdateHandler {
 
 
@@ -20,7 +25,7 @@ public class LogicalDeleteHandler extends AbstractUpdateHandler {
 	}
 
 
-	public <T extends IPersistable> int exec(T dto) {
+	public <T extends ILogicalDeleting> int exec(T dto) {
 
 		try {
 			ITable tbl = dto.getTableDefinition();

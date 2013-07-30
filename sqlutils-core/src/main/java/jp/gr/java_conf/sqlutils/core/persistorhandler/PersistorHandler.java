@@ -21,8 +21,7 @@ public class PersistorHandler {
 	 * Javaではシステム日付はミリ秒までしか取得できないので、レコードのアクセスタイムスタンプとしては不足する恐れがある。
 	 * 一応対応実装しているが、お勧めしない。
 	 * 楽観ロック用キーとして使用するなら数値型のカウンタを使用するか、
-	 * ちょっとややこしいがDBMS側でデフォルト値設定をし、Generator設定でカラムにIgnoreOnInsert,IgnoreOnUpdate等を
-	 * 指定する事。
+	 * Generator設定でカラムにIgnoreOnUpdate等を指定し、DBMS側に任せる事を勧める（但しUPDATE時に自動更新するような設定は一部DBMSでしか不可能）。
 	 */
 	protected Object getOptimisticLockKeyNewValue(IColumn<?> col, Object currentVal) {
 		if (col.getDataType() == Timestamp.class)

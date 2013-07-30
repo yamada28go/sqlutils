@@ -13,6 +13,10 @@ import jp.gr.java_conf.sqlutils.core.dto.ITable;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
 import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 
+/**
+ * DTOインスタンスから、その内容に沿ったUpdate文を生成・実行するハンドラ
+ *
+ */
 public class UpdateHandler extends AbstractUpdateHandler {
 
 
@@ -20,6 +24,11 @@ public class UpdateHandler extends AbstractUpdateHandler {
 		super(manager);
 	}
 
+	/**
+	 * 拡張ポイント.<br/>
+	 * 定型的な処理、例えばUPDATE時に「更新者」にユーザ名を格納する、といった用途に。
+	 * @param attrs キーはカラム名。テーブル横断的に処理するコードを書くには、IColumnは向かないため。
+	 */
 	protected void modifyAttrColValues(Map<String, Object> attrs, ITable tbl) {
 		// for override
 	}

@@ -12,6 +12,11 @@ import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 
+
+/**
+ * DTOインスタンスからSelect文を生成・実行するハンドラ
+ *
+ */
 public class SelectHandler extends PersistorHandler {
 
 

@@ -897,7 +897,7 @@ public class DBManager {
 
 	private <T extends IPersistable> int deleteInner(T dto) {
 		if (dto instanceof ILogicalDeleting)
-			return newLogicalDeleteHandler(this).exec(dto);
+			return newLogicalDeleteHandler(this).exec((ILogicalDeleting)dto);
 		else
 			return newDeleteHandler(this).exec(dto);
 	}
