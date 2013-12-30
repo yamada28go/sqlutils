@@ -13,6 +13,9 @@ public interface IColValueConverter {
 	String getSetToDtoConversion();
 	String getGetFromDtoConversion(String fieldName);
 	void validate(String pos);
+	
+	//! C++ 用 C++内部でデータラッパーに使用する型情報を保持する
+	String getWrapperType();
 
 	public static class ColValueConverter implements IColValueConverter {
 
@@ -24,6 +27,8 @@ public interface IColValueConverter {
 
 		@XmlAttribute(name="getFromDtoConversion")
 		public String getFromDtoConversion;
+		
+		public String getWrapperType;
 
 		@Override
 		public void validate(String pos) {
@@ -45,6 +50,11 @@ public interface IColValueConverter {
 		@Override
 		public String getGetFromDtoConversion(String fieldName) {
 			return getFromDtoConversion.replace(ColValueConverter.FIELDNAME_PLACEHOLDER, fieldName);
+		}
+
+		@Override
+		public String getWrapperType() {
+			return getWrapperType;
 		}
 	}
 

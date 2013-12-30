@@ -1,0 +1,221 @@
+//include files
+\#include <cstdint>
+\#include <stdexcept>
+\#include <array>
+\#include <extension_switch.h>
+\#include <tiny_query_helper/tiny_query_helper.h>
+
+namespace  ${packageName}{
+
+/*
+ * This class is generated automatically.
+ * Never change from your hand.
+ */
+/**
+ * <pre>
+ * schema name : "${schema}"
+ * table name  : "${tbl.name}"
+ * remarks     : "$!{tbl.remarks}"
+ *
+#if(${tbl.persistable})
+ * Persistable:
+ *  Available to use Persistor-methods, like DBManager\#insert(IPersistable),\#update(IPersistable),\#delete(IPersistable),else.
+ *
+#end
+#if(${tbl.optimisticLockKeyCol})
+ * Optimistic-locking:
+ *  Automatically checked whether updated by another user or not at Persistor-methods.
+ *  Key column = "${tbl.optimisticLockKeyCol.name}"
+ *
+#end
+#if(${tbl.logicalDeleteFlagCol})
+ * Logical-delete:
+ *  Logically deleted at DBManager\#delete().
+ *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder\#containLogicalDeletedRecords().
+ *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
+ *
+#end
+ * </pre>
+ */
+struct ${className} : public  tiny_query_helper::dto_base {
+
+
+  //! テーブル名を取得する
+  static const std::string get_tabel_name(void)
+  {
+  		return "${tbl.name}";
+  }
+
+
+//! カラム情報取得用構造体
+  struct column
+  {
+
+	//! tiny query helperが必要なテーブル情報一覧を作成する
+	
+	#foreach($col in ${tbl.cols})
+	/**
+	 * <pre>
+	 * column name   : "${col.name}"
+	 *
+#if(${col.primaryKey})
+	 * primary key   : YES
+#end
+#if(${col.autoIncrement})
+	 * auto-increment
+#end
+	 * nullable      : ${col.nullable}
+	 * data-type     : ${col.dataType} (*java.sql.Types)
+#if(${col.dataTypeChar})
+	 *  < fixed length char >
+#end
+	 * type-name     : ${col.dataTypeName}
+	 * size          : ${col.size}
+	 * default value : "$!{col.defaultValue}"
+	 * remarks       : "$!{col.remarks}"
+	 *
+#if(${col.relatedSequence})
+	 * auto numbering from sequence : "${col.relatedSequence}"
+#end
+#if(${col.logicalDeleteFlag})
+	 * used as logical-delete-flag
+#end
+#if(${col.optimisticLockKey})
+	 * used as optimistic-lock-key
+#end
+##if(${col.relatedEnum})
+##	 * related with value-enum : ${col.relatedEnum}
+##end
+	 * </pre>
+	 * @see java.sql.Types
+##if(${col.relatedEnum})
+##	 * @see ${col.dtoFieldClassType}
+##end
+	 */
+	  
+	  	struct ${col.name} : public tiny_query_helper::column_type::${col.getWrapperType}< ${className} >
+    {
+      ${col.name} (void) :
+      tiny_query_helper::column_type::${col.getWrapperType}< ${className} >("${col.name}") { }
+      static const std::string name_;
+    };
+
+    const static ${col.name} ${col.name};
+	  
+	  
+#end
+
+    //! カラム情報を取得する
+    typedef std::array< const tiny_query_helper::where_condition_base * , ${tbl.cols.size()} > COLUMN_INFO_TYPE;
+    static const COLUMN_INFO_TYPE get_column_info( void )
+    {
+    
+        COLUMN_INFO_TYPE r;
+        #foreach($col in ${tbl.cols})
+		r[ ${foreach.index} ] = &${col.name};
+		#end 
+		
+		
+      return std::move(r);
+    }
+
+    column(void)
+    {
+    }
+
+
+};
+
+	//! ------------------------------------
+	//! メンバ関数の実態を定義する
+	//! ------------------------------------
+
+	#foreach($col in ${tbl.cols})
+	/**
+	 * <pre>
+	 * column name   : "${col.name}"
+	 *
+#if(${col.primaryKey})
+	 * primary key   : YES
+#end
+#if(${col.autoIncrement})
+	 * auto-increment
+#end
+	 * nullable      : ${col.nullable}
+	 * data-type     : ${col.dataType} (*java.sql.Types)
+#if(${col.dataTypeChar})
+	 *  < fixed length char >
+#end
+	 * type-name     : ${col.dataTypeName}
+	 * size          : ${col.size}
+	 * default value : "$!{col.defaultValue}"
+	 * remarks       : "$!{col.remarks}"
+	 *
+#if(${col.relatedSequence})
+	 * auto numbering from sequence : "${col.relatedSequence}"
+#end
+#if(${col.logicalDeleteFlag})
+	 * used as logical-delete-flag
+#end
+#if(${col.optimisticLockKey})
+	 * used as optimistic-lock-key
+#end
+##if(${col.relatedEnum})
+##	 * related with value-enum : ${col.relatedEnum}
+##end
+	 * </pre>
+	 * @see java.sql.Types
+##if(${col.relatedEnum})
+##	 * @see ${col.dtoFieldClassType}
+##end
+	 */
+	 
+	  ${col.dtoFieldClassType} ${col.name}_;
+	  
+#end	
+
+
+
+	//! ------------------------------------
+	//! メンバ情報定義メソッド
+	//! ------------------------------------
+
+      //! メンバに値を設定する
+    template <typename T >
+    void set_member( const std::string & name , const T & ref )
+    {
+
+  	#foreach($col in ${tbl.cols})  	
+  	  if( "${col.name}" == name )
+    {
+      if(true==set_if_same_type( ref , ${col.name}_ ) )
+        {
+         return;
+          }
+    }
+    #end
+        
+      //ここまで来たらデータの取り込みに失敗している。
+      throw std::logic_error( "set data faild" );
+
+
+    }
+};
+
+
+// 出力用の<<演算子定義
+inline std::ostream& operator<<( std::ostream& os, const ${className} & t )
+{
+
+  os << "type : ${className} [  ";
+  
+  	#foreach($col in ${tbl.cols})
+  os << "," << "${col.name} : " << t.${col.name}_ ;
+      #end
+  
+
+  os << " ] ";
+  return os;
+}
+
+}

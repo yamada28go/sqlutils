@@ -26,6 +26,9 @@ public class ColumnInfo {
 	public String dtoFieldClassType;
 	public String setToDtoConversion;
 	public String getFromDtoConversion;
+	
+	//! C++ 用 C++内部でデータラッパーに使用する型情報を保持する
+	public String getWrapperType;
 
 	// TODO templateエンジンをVelocityから変更する。候補はmustache.javaあたり。
 	// VelocityはBeansにしか対応してないので、いちいちgetterを用意しないといけないのが面倒
@@ -84,6 +87,10 @@ public class ColumnInfo {
 	}
 
 
+	public String getGetWrapperType()
+	{
+		return getWrapperType;
+	};
 
 	public boolean isDataTypeChar() {
 		return dataType == Types.CHAR;

@@ -47,4 +47,28 @@ public class VelocityUtil {
 		template.merge(context, bw);
 		bw.close();
 	}
+	
+	public static void writeToFile_cpp(Template template, VelocityContext context,
+			File outputPath, String className) throws IOException {
+
+		File file = new File(outputPath, className + ".cpp");
+		FileOutputStream fo = new FileOutputStream(file);
+		OutputStreamWriter w = new OutputStreamWriter(fo, "UTF-8");
+		BufferedWriter bw = new BufferedWriter(w);
+		template.merge(context, bw);
+		bw.close();
+	}
+	
+	public static void writeToFile_h(Template template, VelocityContext context,
+			File outputPath, String className) throws IOException {
+
+		File file = new File(outputPath, className + ".h");
+		FileOutputStream fo = new FileOutputStream(file);
+		OutputStreamWriter w = new OutputStreamWriter(fo, "UTF-8");
+		BufferedWriter bw = new BufferedWriter(w);
+		template.merge(context, bw);
+		bw.close();
+	}
+	
+	
 }

@@ -13,14 +13,12 @@ import jp.gr.java_conf.sqlutils.common.ValueEnum.IValueEnum;
 import jp.gr.java_conf.sqlutils.core.connection.SimpleConnectionProvider;
 import jp.gr.java_conf.sqlutils.core.connection.Tx;
 import jp.gr.java_conf.sqlutils.core.dto.IColumn;
-import jp.gr.java_conf.sqlutils.core.dto.IColumn.Column;
 import jp.gr.java_conf.sqlutils.core.dto.IDto;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IGeneratedDto;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.ILogicalDeleting;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IOptimisticLocking;
 import jp.gr.java_conf.sqlutils.core.dto.IDto.IPersistable;
 import jp.gr.java_conf.sqlutils.core.dto.ITable;
-import jp.gr.java_conf.sqlutils.core.dto.ITable.Table;
 import jp.gr.java_conf.sqlutils.core.exception.NoSuchColumnException;
 import jp.gr.java_conf.sqlutils.core.exception.RuntimeSQLException;
 import jp.gr.java_conf.sqlutils.generator.common.VelocityUtil;
@@ -68,7 +66,8 @@ public class DtoGenerator {
 		OUTPUT_BASE = config.output.basePath;
 
 		// Plugin
-		DtoGenerator.PLUGIN = new DtoGeneratorPlugin();
+		//DtoGenerator.PLUGIN = new DtoGeneratorPlugin();
+		DtoGenerator.PLUGIN = new DtoGeneratorPlugin4CPP();
 
 	}
 
@@ -169,42 +168,54 @@ public class DtoGenerator {
 
 
 		// generate dto-java file
-		Template template = VelocityUtil.getTemplate(this, "Dto.vm");
 		for (TableInfo table : tables) {
-			VelocityContext context = new VelocityContext();
-			context.put("schema", SCHEMA);
-			context.put("class_ITable", ITable.class.getCanonicalName());
-			context.put("class_IColumn", IColumn.class.getCanonicalName());
-			context.put("class_IDto", IDto.class.getCanonicalName());
-			context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
-			context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
-			context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
-			context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
-			context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
-			context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
-			context.put("tbl", table);
-			context.put("className", table.getDtoClassName());
-			context.put("packageName", CONFIG.package_);
-//			context.put("defPackageName", defPackageName);
-			context.put("defClassName", CONFIG.definitionClassName);
-//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
-			VelocityUtil.writeToFile(template, context, outputDir, table.getDtoClassName());
-		}
+			{
+				Template template = VelocityUtil.getTemplate(this, "h_Dto.vm");
+				VelocityContext context = new VelocityContext();
+				context.put("schema", SCHEMA);
+				context.put("class_ITable", ITable.class.getCanonicalName());
+				context.put("class_IColumn", IColumn.class.getCanonicalName());
+				context.put("class_IDto", IDto.class.getCanonicalName());
+				context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
+				context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
+				context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
+				context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
+				context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
+				context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
+				context.put("tbl", table);
+				context.put("className", table.getDtoClassName());
+				context.put("packageName", CONFIG.package_);
+				//			context.put("defPackageName", defPackageName);
+				context.put("defClassName", CONFIG.definitionClassName);
+				//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
+				VelocityUtil.writeToFile_h(template, context, outputDir, table.getDtoClassName());
+			}
 
-		// generate definition-java file
-		template = VelocityUtil.getTemplate(this, "Definitions.vm");
-		VelocityContext context = new VelocityContext();
-		context.put("schema", SCHEMA);
-		context.put("packageName", CONFIG.package_);
-//		context.put("dtoPackageName", dtoPackageName);
-		context.put("class_IDto", IDto.class.getName());
-		context.put("class_ITable", ITable.class.getName());
-		context.put("class_Table", Table.class.getCanonicalName());
-		context.put("class_IColumn", IColumn.class.getName());
-		context.put("class_Column", Column.class.getCanonicalName());
-		context.put("tbls", tables);
-		context.put("defClassName", CONFIG.definitionClassName);
-		VelocityUtil.writeToFile(template, context, outputDir, CONFIG.definitionClassName);
+			//C++ソースコードを出力する
+			{
+				Template template = VelocityUtil.getTemplate(this, "cpp_Dto.vm");
+				VelocityContext context = new VelocityContext();
+				context.put("schema", SCHEMA);
+				context.put("class_ITable", ITable.class.getCanonicalName());
+				context.put("class_IColumn", IColumn.class.getCanonicalName());
+				context.put("class_IDto", IDto.class.getCanonicalName());
+				context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
+				context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
+				context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
+				context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
+				context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
+				context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
+				context.put("tbl", table);
+				context.put("className", table.getDtoClassName());
+				context.put("packageName", CONFIG.package_);
+				//			context.put("defPackageName", defPackageName);
+				context.put("defClassName", CONFIG.definitionClassName);
+				//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
+				VelocityUtil.writeToFile_cpp(template, context, outputDir, table.getDtoClassName());
+			}
+
+
+		}
 
 		logger.info("@@@@ done. @@@@");
 	}

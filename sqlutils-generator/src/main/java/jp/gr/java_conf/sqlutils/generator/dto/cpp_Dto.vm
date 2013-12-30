@@ -1,0 +1,52 @@
+//include files
+\#include "${className}.h"
+
+namespace  ${packageName}{
+
+/*
+ * This class is generated automatically.
+ * Never change from your hand.
+ */
+/**
+ * <pre>
+ * schema name : "${schema}"
+ * table name  : "${tbl.name}"
+ * remarks     : "$!{tbl.remarks}"
+ *
+#if(${tbl.persistable})
+ * Persistable:
+ *  Available to use Persistor-methods, like DBManager\#insert(IPersistable),\#update(IPersistable),\#delete(IPersistable),else.
+ *
+#end
+#if(${tbl.optimisticLockKeyCol})
+ * Optimistic-locking:
+ *  Automatically checked whether updated by another user or not at Persistor-methods.
+ *  Key column = "${tbl.optimisticLockKeyCol.name}"
+ *
+#end
+#if(${tbl.logicalDeleteFlagCol})
+ * Logical-delete:
+ *  Logically deleted at DBManager\#delete().
+ *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder\#containLogicalDeletedRecords().
+ *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
+ *
+#end
+ * </pre>
+ */
+ 
+ 
+ //実体を定義
+
+//カラム情報オブジェクトを定義
+#foreach($col in ${tbl.cols})
+const std::string ${className}::column::${col.name}::name_ ("${col.name}");
+#end
+ 
+ 
+ //カラム情報の実態を定義
+#foreach($col in ${tbl.cols})
+const typename ${className}::column::${col.name} ${className}::column::${col.name};
+#end
+
+ 
+}

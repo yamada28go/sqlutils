@@ -97,6 +97,7 @@ public class DtoGeneratorPlugin {
 		if (c == null)
 			c = getDataTypeConverter(rs, dbmd);
 		col.dtoFieldClassType = c.getDtoFieldClassType();
+		col.getWrapperType = c.getWrapperType();
 		col.setToDtoConversion = c.getSetToDtoConversion();
 		col.getFromDtoConversion = c.getGetFromDtoConversion(col.dtoFieldName);
 
