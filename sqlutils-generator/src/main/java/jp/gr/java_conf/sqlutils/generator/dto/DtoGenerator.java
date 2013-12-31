@@ -200,7 +200,6 @@ public class DtoGenerator {
 					context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
 					context.put("tbl", table);
 					context.put("className", table.getDtoClassName());
-					context.put("packageName", CONFIG.package_);
 					//			context.put("defPackageName", defPackageName);
 					context.put("defClassName", CONFIG.definitionClassName);
 					//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
@@ -234,8 +233,7 @@ public class DtoGenerator {
 					context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
 					context.put("tbl", table);
 					context.put("className", table.getDtoClassName());
-					context.put("packageName", CONFIG.package_);
-					//			context.put("defPackageName", defPackageName);
+										//			context.put("defPackageName", defPackageName);
 					context.put("defClassName", CONFIG.definitionClassName);
 					
 					//名前空間の定義に使用する。

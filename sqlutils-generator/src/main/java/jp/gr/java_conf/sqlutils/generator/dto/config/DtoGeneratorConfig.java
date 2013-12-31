@@ -16,9 +16,6 @@ public class DtoGeneratorConfig {
 	@XmlAttribute(name="definitionClassName")
 	public String definitionClassName = "TableDefine";
 
-	@XmlAttribute(name="package")
-	public String package_;
-	
 	@XmlAttribute(name="namespace")
 	public String namespace;
 
@@ -112,7 +109,6 @@ public class DtoGeneratorConfig {
 
 	public void preCheck() {
 		Config.CheckRequired(definitionClassName, "dtoGenerator@definitionClassName");
-		Config.CheckRequired(package_, "dtoGenerator@package");
 		Config.CheckRequired(namespace, "dtoGenerator@namespace");
 		check_namespace();
 		
