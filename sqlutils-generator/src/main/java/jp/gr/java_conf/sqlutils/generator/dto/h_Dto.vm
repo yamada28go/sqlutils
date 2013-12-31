@@ -2,7 +2,7 @@
 \#include <cstdint>
 \#include <stdexcept>
 \#include <array>
-\#include <extension_switch.h>
+\#include <tiny_query_helper/extension_switch.h>
 \#include <tiny_query_helper/tiny_query_helper.h>
 
 
@@ -52,7 +52,9 @@ struct ${className} : public  tiny_query_helper::dto_base {
   struct column
   {
 
-	//! tiny query helperが必要なテーブル情報一覧を作成する
+            //!テーブルの型情報を定義する構造体
+
+            struct type {
 	
 	#foreach($col in ${tbl.cols})
 	/**
@@ -100,11 +102,18 @@ struct ${className} : public  tiny_query_helper::dto_base {
       tiny_query_helper::column_type::${col.getWrapperType}< ${className} >("${col.name}") { }
       static const std::string name_;
     };
-
-    const static ${col.name} ${col.name};
-	  
-	  
+  
 #end
+
+};
+
+	  struct data{
+
+            //! tiny query helperが必要なテーブル情報一覧を作成する
+            	#foreach($col in ${tbl.cols})
+            	const static ::${class_DtoGeneratorConfig.namespace}::${className}::column::type::${col.name} ${col.name};
+            	#end
+            
 
     //! カラム情報を取得する
     typedef std::array< const tiny_query_helper::where_condition_base * , ${tbl.cols.size()} > COLUMN_INFO_TYPE;
@@ -119,6 +128,8 @@ struct ${className} : public  tiny_query_helper::dto_base {
 		
       return std::move(r);
     }
+    
+    };
 
     column(void)
     {

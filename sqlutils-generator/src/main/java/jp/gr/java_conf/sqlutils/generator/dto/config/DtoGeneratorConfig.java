@@ -19,6 +19,11 @@ public class DtoGeneratorConfig {
 	@XmlAttribute(name="namespace")
 	public String namespace;
 
+	
+	public String getNamespace() {
+		return namespace;
+	}
+
 	//名前空間の可視宣言を作成する
 	public String get_namespace_Declaration_start()
 	{

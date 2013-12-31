@@ -37,15 +37,15 @@ ${class_DtoGeneratorConfig.get_namespace_Declaration_start()}
  
  //実体を定義
 
-//カラム情報オブジェクトを定義
+//カラム情報の実態を定義
 #foreach($col in ${tbl.cols})
-const std::string ${className}::column::${col.name}::name_ ("${col.name}");
+const typename ${className}::column::type::${col.name} ${className}::column::data::${col.name}; 
 #end
  
  
- //カラム情報の実態を定義
+ //カラム情報のオブジェクトを定義
 #foreach($col in ${tbl.cols})
-const typename ${className}::column::${col.name} ${className}::column::${col.name};
+const std::string ${className}::column::type::${col.name}::name_("${col.name}");
 #end
 
  
