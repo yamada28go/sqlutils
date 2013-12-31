@@ -16,26 +16,6 @@ ${class_DtoGeneratorConfig.get_namespace_Declaration_start()}
  * <pre>
  * schema name : "${schema}"
  * table name  : "${tbl.name}"
- * remarks     : "$!{tbl.remarks}"
- *
-#if(${tbl.persistable})
- * Persistable:
- *  Available to use Persistor-methods, like DBManager\#insert(IPersistable),\#update(IPersistable),\#delete(IPersistable),else.
- *
-#end
-#if(${tbl.optimisticLockKeyCol})
- * Optimistic-locking:
- *  Automatically checked whether updated by another user or not at Persistor-methods.
- *  Key column = "${tbl.optimisticLockKeyCol.name}"
- *
-#end
-#if(${tbl.logicalDeleteFlagCol})
- * Logical-delete:
- *  Logically deleted at DBManager\#delete().
- *  If deleted logically, the record hasn't selected from QueryBuilder-created-sql instead of call QueryBuilder\#containLogicalDeletedRecords().
- *  Flag column = "${tbl.logicalDeleteFlagCol.name}"
- *
-#end
  * </pre>
  */
 struct ${className} : public  tiny_query_helper::dto_base {
@@ -53,7 +33,6 @@ struct ${className} : public  tiny_query_helper::dto_base {
   {
 
             //!テーブルの型情報を定義する構造体
-
             struct type {
 	
 	#foreach($col in ${tbl.cols})
@@ -75,25 +54,7 @@ struct ${className} : public  tiny_query_helper::dto_base {
 	 * type-name     : ${col.dataTypeName}
 	 * size          : ${col.size}
 	 * default value : "$!{col.defaultValue}"
-	 * remarks       : "$!{col.remarks}"
-	 *
-#if(${col.relatedSequence})
-	 * auto numbering from sequence : "${col.relatedSequence}"
-#end
-#if(${col.logicalDeleteFlag})
-	 * used as logical-delete-flag
-#end
-#if(${col.optimisticLockKey})
-	 * used as optimistic-lock-key
-#end
-##if(${col.relatedEnum})
-##	 * related with value-enum : ${col.relatedEnum}
-##end
 	 * </pre>
-	 * @see java.sql.Types
-##if(${col.relatedEnum})
-##	 * @see ${col.dtoFieldClassType}
-##end
 	 */
 	  
 	  	struct ${col.name} : public tiny_query_helper::column_type::${col.getWrapperType}< ${className} >
@@ -164,25 +125,7 @@ struct ${className} : public  tiny_query_helper::dto_base {
 	 * type-name     : ${col.dataTypeName}
 	 * size          : ${col.size}
 	 * default value : "$!{col.defaultValue}"
-	 * remarks       : "$!{col.remarks}"
-	 *
-#if(${col.relatedSequence})
-	 * auto numbering from sequence : "${col.relatedSequence}"
-#end
-#if(${col.logicalDeleteFlag})
-	 * used as logical-delete-flag
-#end
-#if(${col.optimisticLockKey})
-	 * used as optimistic-lock-key
-#end
-##if(${col.relatedEnum})
-##	 * related with value-enum : ${col.relatedEnum}
-##end
 	 * </pre>
-	 * @see java.sql.Types
-##if(${col.relatedEnum})
-##	 * @see ${col.dtoFieldClassType}
-##end
 	 */
 	 
 	  ${col.dtoFieldClassType} ${col.name}_;
