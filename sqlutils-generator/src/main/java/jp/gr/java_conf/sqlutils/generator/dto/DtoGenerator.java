@@ -1,6 +1,7 @@
 package jp.gr.java_conf.sqlutils.generator.dto;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,11 +45,14 @@ public class DtoGenerator {
 	public static DtoGeneratorConfig CONFIG;
 	public static DtoGeneratorPlugin PLUGIN;
 	public static String SCHEMA;
-	public static String OUTPUT_BASE;
+	
+	private Config config;
 
 	@SuppressWarnings("deprecation")
 	public DtoGenerator(Config config) {
 
+		this.config = config;
+		
 		// DBManager
 		Properties props = new Properties();
 		props.put("user", config.db.user);
@@ -63,11 +67,28 @@ public class DtoGenerator {
 		CONFIG = config.dtoGenerator;
 		ENUM_CONFIG = config.enumGenerator;
 		SCHEMA = config.db.schema;
-		OUTPUT_BASE = config.output.basePath;
 
 		// Plugin
 		//DtoGenerator.PLUGIN = new DtoGeneratorPlugin();
 		DtoGenerator.PLUGIN = new DtoGeneratorPlugin4CPP();
+
+	}
+	
+	//ファイル出力ディレクトリを生成する
+	//すでにディレクトリが存在する場合は、同ディレクトリの中身を初期化する。
+	//存在しない場合は同ディレクトリの中身を初期化する。
+	private File Generate_file_out_put_dir( String Path ) throws IOException
+	{
+		
+		File outputDir = new File(Path);
+		logger.debug(outputDir.getAbsolutePath());
+
+		// clean output-dir (or mkdir)
+		if (outputDir.exists())
+			FileUtils.cleanDirectory(outputDir);
+		else
+			FileUtils.forceMkdir(outputDir);
+		return outputDir;
 
 	}
 
@@ -77,16 +98,6 @@ public class DtoGenerator {
 		logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 		logger.info("@@@@ start generate DTO-classes from db. @@@@");
 		logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
-		File outputDir = new File(OUTPUT_BASE, CONFIG.package_.replace(".", File.separator));
-		logger.debug(outputDir.getAbsolutePath());
-
-		// clean output-dir (or mkdir)
-		if (outputDir.exists())
-			FileUtils.cleanDirectory(outputDir);
-		else
-			FileUtils.forceMkdir(outputDir);
-
 
 		// init velocity
 		VelocityUtil.initVelocity();
@@ -168,53 +179,74 @@ public class DtoGenerator {
 
 
 		// generate dto-java file
-		for (TableInfo table : tables) {
-			{
-				Template template = VelocityUtil.getTemplate(this, "h_Dto.vm");
-				VelocityContext context = new VelocityContext();
-				context.put("schema", SCHEMA);
-				context.put("class_ITable", ITable.class.getCanonicalName());
-				context.put("class_IColumn", IColumn.class.getCanonicalName());
-				context.put("class_IDto", IDto.class.getCanonicalName());
-				context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
-				context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
-				context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
-				context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
-				context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
-				context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
-				context.put("tbl", table);
-				context.put("className", table.getDtoClassName());
-				context.put("packageName", CONFIG.package_);
-				//			context.put("defPackageName", defPackageName);
-				context.put("defClassName", CONFIG.definitionClassName);
-				//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
-				VelocityUtil.writeToFile_h(template, context, outputDir, table.getDtoClassName());
+		{
+			//テーブル識別idカウンター
+			Table_id_counter id = new Table_id_counter();
+			
+			File o = Generate_file_out_put_dir(config.output.header_Path);
+			for (TableInfo table : tables) {
+				{
+					Template template = VelocityUtil.getTemplate(this, "h_Dto.vm");
+					VelocityContext context = new VelocityContext();
+					context.put("schema", SCHEMA);
+					context.put("class_ITable", ITable.class.getCanonicalName());
+					context.put("class_IColumn", IColumn.class.getCanonicalName());
+					context.put("class_IDto", IDto.class.getCanonicalName());
+					context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
+					context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
+					context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
+					context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
+					context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
+					context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
+					context.put("tbl", table);
+					context.put("className", table.getDtoClassName());
+					context.put("packageName", CONFIG.package_);
+					//			context.put("defPackageName", defPackageName);
+					context.put("defClassName", CONFIG.definitionClassName);
+					//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
+					//名前空間の定義に使用する。
+					context.put("class_DtoGeneratorConfig", CONFIG);
+					//テーブル識別idカウンターを設定
+					context.put("class_Table_id_counter", id);
+					
+					VelocityUtil.writeToFile_h(template, context, o, table.getDtoClassName());
+
+				}
 			}
+		}
 
-			//C++ソースコードを出力する
-			{
-				Template template = VelocityUtil.getTemplate(this, "cpp_Dto.vm");
-				VelocityContext context = new VelocityContext();
-				context.put("schema", SCHEMA);
-				context.put("class_ITable", ITable.class.getCanonicalName());
-				context.put("class_IColumn", IColumn.class.getCanonicalName());
-				context.put("class_IDto", IDto.class.getCanonicalName());
-				context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
-				context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
-				context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
-				context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
-				context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
-				context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
-				context.put("tbl", table);
-				context.put("className", table.getDtoClassName());
-				context.put("packageName", CONFIG.package_);
-				//			context.put("defPackageName", defPackageName);
-				context.put("defClassName", CONFIG.definitionClassName);
-				//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
-				VelocityUtil.writeToFile_cpp(template, context, outputDir, table.getDtoClassName());
+		//C++ソースコードを出力する
+		{
+			File o = Generate_file_out_put_dir(config.output.source_Path);
+			for (TableInfo table : tables) {
+				{
+					Template template = VelocityUtil.getTemplate(this, "cpp_Dto.vm");
+					VelocityContext context = new VelocityContext();
+					context.put("schema", SCHEMA);
+					context.put("class_ITable", ITable.class.getCanonicalName());
+					context.put("class_IColumn", IColumn.class.getCanonicalName());
+					context.put("class_IDto", IDto.class.getCanonicalName());
+					context.put("class_IPersistableDto", IPersistable.class.getCanonicalName());
+					context.put("class_IGeneratedDto", IGeneratedDto.class.getCanonicalName());
+					context.put("class_IOptimisticLockingDto", IOptimisticLocking.class.getCanonicalName());
+					context.put("class_ILogicalDeletingDto", ILogicalDeleting.class.getCanonicalName());
+					context.put("class_IValueEnum", IValueEnum.class.getCanonicalName());
+					context.put("class_NoSuchColumnException", NoSuchColumnException.class.getCanonicalName());
+					context.put("tbl", table);
+					context.put("className", table.getDtoClassName());
+					context.put("packageName", CONFIG.package_);
+					//			context.put("defPackageName", defPackageName);
+					context.put("defClassName", CONFIG.definitionClassName);
+					
+					//名前空間の定義に使用する。
+					context.put("class_DtoGeneratorConfig", CONFIG);
+
+					//			context.put("noColumnFieldNameConversion", settings.generator.no_column_field_name_conversion);
+					VelocityUtil.writeToFile_cpp(template, context,o , table.getDtoClassName());
+				}
+
+
 			}
-
-
 		}
 
 		logger.info("@@@@ done. @@@@");

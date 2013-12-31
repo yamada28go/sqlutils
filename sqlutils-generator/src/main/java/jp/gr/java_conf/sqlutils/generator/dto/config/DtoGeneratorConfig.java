@@ -2,6 +2,8 @@ package jp.gr.java_conf.sqlutils.generator.dto.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,6 +18,79 @@ public class DtoGeneratorConfig {
 
 	@XmlAttribute(name="package")
 	public String package_;
+	
+	@XmlAttribute(name="namespace")
+	public String namespace;
+
+	//名前空間の可視宣言を作成する
+	public String get_namespace_Declaration_start()
+	{
+		//名前空間未指定の場合は何もしない
+		if(true == namespace.isEmpty())
+			return "";
+		
+		//階層を::で分割して名前空間の結合を行う
+		String[] a = namespace.split("::");
+		StringBuffer t = new StringBuffer();
+		for (String ns : a) {
+			
+			t.append("namespace ");
+			t.append(ns);
+			t.append("{ ");
+			
+		}
+		
+		return t.toString();
+	}
+
+	//名前空間の階層を数える
+	private int count_namespace_separator( String namespace )
+	{
+		String[] a = namespace.split("::");
+		if( 0==a.length)
+		{
+			return 1;
+		}
+		else
+		{
+			return a.length;	
+		}
+	}
+	
+	//名前空間の可視宣言を作成する
+	public String get_namespace_Declaration_end()
+	{
+		if(true == namespace.isEmpty())
+			return "";
+		
+		StringBuffer t = new StringBuffer();
+		for(int i =0;i<count_namespace_separator(this.namespace);i++)
+		{
+			t.append('}');
+		}
+		
+		return t.toString();
+	}
+	
+	//名前空間の文字列指定が正しい形式が判定する
+	void check_namespace()
+	{
+		//指定が無い場合はok
+		if( false == namespace.isEmpty())
+		{
+			//C++識別子の判定用正規表現としては、完璧では無いが
+			//このプログラムでは問題とならない程度で判定処理を記述する
+			String regex = "^(\\w+::*)*\\w+$";
+			Pattern p = Pattern.compile(regex);
+
+			Matcher m = p.matcher(namespace);
+			if (!m.find()){
+			  //正規表現に合致しなければ例外を発行する
+				throw new RuntimeException("Namespace definition is wrong. [" + this.namespace + " ] ");
+			}
+			
+		}
+	}
 
 	public TableNameResolvers defaultTblNameResolver = TableNameResolvers.getDefaultResolver();
 
@@ -38,6 +113,9 @@ public class DtoGeneratorConfig {
 	public void preCheck() {
 		Config.CheckRequired(definitionClassName, "dtoGenerator@definitionClassName");
 		Config.CheckRequired(package_, "dtoGenerator@package");
+		Config.CheckRequired(namespace, "dtoGenerator@namespace");
+		check_namespace();
+		
 		defaultTblNameResolver.validate("dtoGenerator/defaultTblNameResolver");
 		defaultColNameResolver.validate("dtoGenerator/defaultColNameResolver");
 

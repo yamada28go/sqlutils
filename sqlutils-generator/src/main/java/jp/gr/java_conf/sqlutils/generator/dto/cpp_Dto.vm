@@ -1,7 +1,7 @@
 //include files
 \#include "${className}.h"
 
-namespace  ${packageName}{
+${class_DtoGeneratorConfig.get_namespace_Declaration_start()}
 
 /*
  * This class is generated automatically.
@@ -49,4 +49,4 @@ const typename ${className}::column::${col.name} ${className}::column::${col.nam
 #end
 
  
-}
+${class_DtoGeneratorConfig.get_namespace_Declaration_end()}

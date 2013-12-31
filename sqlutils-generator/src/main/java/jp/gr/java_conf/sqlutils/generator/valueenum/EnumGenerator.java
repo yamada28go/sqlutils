@@ -1,23 +1,10 @@
 package jp.gr.java_conf.sqlutils.generator.valueenum;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import jp.gr.java_conf.sqlutils.DBManager;
-import jp.gr.java_conf.sqlutils.common.ValueEnum.IValueEnum;
 import jp.gr.java_conf.sqlutils.core.connection.SimpleConnectionProvider;
-import jp.gr.java_conf.sqlutils.generator.common.VelocityUtil;
 import jp.gr.java_conf.sqlutils.generator.dto.config.Config;
 import jp.gr.java_conf.sqlutils.generator.valueenum.config.EnumGeneratorConfig;
-import jp.gr.java_conf.sqlutils.generator.valueenum.config.EnumGeneratorConfig.DataType;
-import jp.gr.java_conf.sqlutils.generator.valueenum.config.EnumGeneratorConfig.SrcTable;
-import jp.gr.java_conf.sqlutils.generator.valueenum.config.ValueEnumDefine;
 
-import org.apache.commons.dbutils.handlers.ArrayListHandler;
-import org.apache.commons.io.FileUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +14,7 @@ public class EnumGenerator {
 
 	public static EnumGeneratorConfig CONFIG;
 	public static String SCHEMA;
-	public static String OUTPUT_BASE;
+	//public static String OUTPUT_BASE;
 
 	@SuppressWarnings("deprecation")
 	public EnumGenerator(Config config) {
@@ -41,17 +28,22 @@ public class EnumGenerator {
 		// Config
 		CONFIG = config.enumGenerator;
 		SCHEMA = config.db.schema;
-		OUTPUT_BASE = config.output.basePath;
+		//OUTPUT_BASE = config.output.basePath;
 
 	}
 
 	@SuppressWarnings("deprecation")
 	public void generate() throws Exception {
-
+		
 		logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 		logger.info("@@@@ start generate enums-classes from db. @@@@");
 		logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
+		
+		logger.info("This vesrion is not support enums-classes");
+		
+		throw new RuntimeException("This vesrion is not support enums-classes");
+		
+/*
 		File outputDir = new File(OUTPUT_BASE, CONFIG.package_.replace(".", File.separator));
 		logger.debug(outputDir.getAbsolutePath());
 
@@ -122,5 +114,7 @@ public class EnumGenerator {
 
 			logger.info("@@@@ done. @@@@");
 		}
+					*/
+
 	}
 }

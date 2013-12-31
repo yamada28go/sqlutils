@@ -5,7 +5,8 @@
 \#include <extension_switch.h>
 \#include <tiny_query_helper/tiny_query_helper.h>
 
-namespace  ${packageName}{
+
+${class_DtoGeneratorConfig.get_namespace_Declaration_start()}
 
 /*
  * This class is generated automatically.
@@ -126,6 +127,9 @@ struct ${className} : public  tiny_query_helper::dto_base {
 
 };
 
+    //テーブル識別ID
+    typedef boost::mpl::int_<${class_Table_id_counter.get_id()}> TABLE_ID;
+
 	//! ------------------------------------
 	//! メンバ関数の実態を定義する
 	//! ------------------------------------
@@ -218,4 +222,4 @@ inline std::ostream& operator<<( std::ostream& os, const ${className} & t )
   return os;
 }
 
-}
+${class_DtoGeneratorConfig.get_namespace_Declaration_end()}

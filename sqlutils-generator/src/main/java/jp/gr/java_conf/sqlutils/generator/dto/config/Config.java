@@ -43,11 +43,17 @@ public class Config {
 
 	public static class OutputSetting {
 
-		@XmlAttribute(name="basePath")
-		public String basePath;
+
+		@XmlAttribute(name="header_Path")
+		public String header_Path;
+		@XmlAttribute(name="source_Path")
+		public String source_Path;
 
 		public void validate() {
-			CheckRequired(basePath, "output@basePath");
+			//CheckRequired(basePath, "output@basePath");
+			CheckRequired(header_Path, "output@header_Path");
+			CheckRequired(source_Path, "output@source_Path");
+			
 		}
 	}
 
