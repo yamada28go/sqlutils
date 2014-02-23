@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -309,5 +310,32 @@ public class UnClosableConnection implements Connection {
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
 		return base.createStruct(typeName, attributes);
+	}
+	
+   //--------------------------JDBC 4.1 -----------------------------
+	@Override
+	public void setSchema(String schema) throws SQLException {
+		base.setSchema(schema);
+	}
+
+	@Override
+	public String getSchema() throws SQLException {
+		return base.getSchema();
+	}
+
+	@Override
+	public void abort(Executor executor) throws SQLException {
+		base.abort(executor);
+	}
+
+	@Override
+	public void setNetworkTimeout(Executor executor, int milliseconds)
+			throws SQLException {
+		base.setNetworkTimeout(executor, milliseconds);
+	}
+
+	@Override
+	public int getNetworkTimeout() throws SQLException {
+		return base.getNetworkTimeout();
 	}
 }
